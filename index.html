@@ -254,7 +254,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
   <div class="card" id="saved-players-card" style="display:none">
     <div class="card-hd">💾 Người chơi đã lưu</div>
     <div id="saved-chips" style="margin-bottom:.5rem"></div>
-    <button class="btn btn-secondary btn-sm" onclick="fillFromSaved()">✓ Điền tên đã chọn</button>
+    <div style="display:flex;gap:.5rem">
+      <button class="btn btn-secondary btn-sm" style="flex:1" onclick="clearNameInputs()">🗑 Làm mới</button>
+    </div>
   </div>
   <div id="name-inputs" style="width:100%;max-width:380px"></div>
   <div style="width:100%;max-width:380px;display:flex;flex-direction:column;gap:.45rem">
@@ -306,7 +308,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
   <div class="info-box" id="ni-action" style="font-size:.86rem;line-height:1.65;text-align:center"></div>
   <div id="night-picker-area" style="width:100%;max-width:380px"></div>
   <div style="width:100%;max-width:380px;margin-top:.3rem;display:flex;gap:.5rem">
-    <button class="btn btn-secondary" id="ni-skip-btn" onclick="nightSkip()" style="display:none;flex:0 0 auto;padding:.75rem .9rem">Bỏ qua ⏭</button>
+    <button class="btn btn-secondary" id="ni-skip-btn" onclick="nightSkip()" style="display:none;flex:1">⏭ Bỏ qua</button>
     <button class="btn btn-primary" id="ni-btn" onclick="nightNext()" style="flex:1">Tiếp theo →</button>
   </div>
 </div>
@@ -399,8 +401,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
     <div class="win-sub" id="win-sub"></div>
     <div style="height:1.5rem"></div>
     <div style="width:100%;max-width:380px;display:flex;flex-direction:column;gap:.45rem">
-      <button class="btn btn-secondary" onclick="showHistory()">📜 Xem lại diễn biến</button>
       <button class="btn btn-primary" onclick="fullReset()">🔄 Chơi ván mới</button>
+      <button class="btn btn-secondary" onclick="goBack()">← Quay lại</button>
     </div>
     <div style="font-size:.62rem;color:var(--muted);margin-top:.5rem;letter-spacing:1px">MA SÓI · by anhgiaochilang</div>
   </div>
@@ -723,16 +725,30 @@ function fillFromSaved() {
 function goSetupPlayers() {
   var total = Object.values(st.roles).reduce(function(a,b){return a+b;},0);
   if(total!==st.n){showToast('⚠️ Tổng vai ('+total+') ≠ số người ('+st.n+')!');return;}
-  var saved=loadSavedPlayers();
-  document.getElementById('saved-players-card').style.display=saved.length?'block':'none';
+  var saved = loadSavedPlayers();
+  var card = document.getElementById('saved-players-card');
+  card.style.display = saved.length ? 'block' : 'none';
   renderSavedChips();
-  var cont=document.getElementById('name-inputs'); cont.innerHTML='';
+  var cont = document.getElementById('name-inputs'); cont.innerHTML='';
   for(var i=0;i<st.n;i++){
-    var inp=document.createElement('input');
-    inp.className='inp'; inp.placeholder='Người chơi '+(i+1); inp.id='pn-'+i;
+    var inp = document.createElement('input');
+    inp.className='inp';
+    inp.placeholder='Người chơi '+(i+1);
+    inp.id='pn-'+i;
+    // Tự điền tên đã lưu theo thứ tự
+    if(saved[i]) inp.value = saved[i];
     cont.appendChild(inp);
   }
   goScreen('s-players');
+}
+
+function clearNameInputs() {
+  for(var i=0;i<st.n;i++){
+    var inp=document.getElementById('pn-'+i);
+    if(inp) inp.value='';
+  }
+  sfx('click');
+  showToast('🗑 Đã xóa hết tên, nhập lại từ đầu.');
 }
 
 // ===== START GAME =====

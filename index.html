@@ -1383,23 +1383,34 @@ function showHistory() {
 
 // ===== WIN =====
 function checkWin() {
-  var alive=st.players.filter(function(p){return p.alive;});
-  var wolves=alive.filter(function(p){return WOLF_ROLES.includes(p.role);}).length;
-  var others=alive.length-wolves;
-  if(wolves===0){sfx('win');setWin('🎉','DÂN LÀNG THẮNG!','Tiêu diệt toàn bộ Ma Sói sau '+st.round+' vòng!');}
-  else if(wolves>=others){sfx('wolf');setWin('🐺','MA SÓI THẮNG!','Ma Sói chiếm đa số sau '+st.round+' vòng!');}
-  else showToast('🐺 '+wolves+' Ma Sói  |  👥 '+others+' Dân còn lại');
+  // Nếu game đã kết thúc thì không check lại
+  if(document.getElementById('s-win').classList.contains('active')) return;
+  var alive = st.players.filter(function(p){return p.alive;});
+  var wolves = alive.filter(function(p){return WOLF_ROLES.includes(p.role);}).length;
+  var villagers = alive.length - wolves; // dân còn sống (không tính sói)
+  if(wolves === 0){
+    sfx('win');
+    setWin('🎉','DÂN LÀNG THẮNG!','Tiêu diệt toàn bộ Ma Sói sau '+st.round+' vòng!');
+  } else if(wolves >= villagers){
+    // Sói bằng hoặc nhiều hơn dân → sói thắng
+    sfx('wolf');
+    setWin('🐺','MA SÓI THẮNG!','Ma Sói chiếm đa số sau '+st.round+' vòng!');
+  } else {
+    showToast('🐺 '+wolves+' Ma Sói  |  👥 '+villagers+' Dân còn lại');
+  }
 }
 function setWin(emoji,title,sub) {
-  if(st.currentLogRound)st.gameLog.push(JSON.parse(JSON.stringify(st.currentLogRound)));
-  document.getElementById('win-emoji').textContent=emoji;
-  document.getElementById('win-title').textContent=title;
-  document.getElementById('win-sub').textContent=sub;
+  // Đánh dấu game đã kết thúc trước khi chuyển màn
+  st.gameOver = true;
+  if(st.currentLogRound) st.gameLog.push(JSON.parse(JSON.stringify(st.currentLogRound)));
+  document.getElementById('win-emoji').textContent = emoji;
+  document.getElementById('win-title').textContent = title;
+  document.getElementById('win-sub').textContent = sub;
   goScreen('s-win');
 }
 function fullReset() {
   clearInterval(st.timerIv);
-  st.players=[];st.assigned=[];st.dealIdx=0;st.round=1;
+  st.gameOver = false; st.players=[];st.assigned=[];st.dealIdx=0;st.round=1;
   st.gameLog=[];st.currentLogRound=null;st.hunterQueue=[];
   st.nc=freshNc();st.voteMap={};
   goScreen('s-home');

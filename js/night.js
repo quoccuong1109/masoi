@@ -222,6 +222,7 @@ export function updateNight() {
   var isLast = st.nightStep >= st.nightOrder.length-1;
   document.getElementById('ni-btn').textContent = isLast ? '☀️ Sang ban ngày' : 'Tiếp theo →';
   document.getElementById('ni-skip-btn').style.display = SKIPPABLE.includes(s.step) ? 'block' : 'none';
+  document.getElementById('ni-back-btn').style.display = st.nightStep > 0 ? 'block' : 'none';
   document.getElementById('night-picker-area').innerHTML = '';
   var alive = st.players.map(function(p,i){return Object.assign({},p,{_idx:i});}).filter(function(p){return p.alive;});
 
@@ -298,6 +299,13 @@ export function updateNight() {
     if(!mmAlive){showDeadRoleNotice('🤝','Mối Giới đã chết — bỏ qua.');return;}
     buildMatchmakerPicker(alive);
   }
+}
+
+export function nightBack() {
+  if(st.nightStep<=0) return;
+  sfx('click');
+  st.nightStep--;
+  updateNight();
 }
 
 export function nightSkip() {

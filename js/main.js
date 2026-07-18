@@ -4,11 +4,11 @@ import {
   openRolePopup, goSetupPlayers, clearNameInputs, startGame,
   removePlayer, fillFromSaved, flipCard, nextDeal, initSlider
 } from './setup.js';
-import { startNight, nightSkip, nightNext, setStartDay } from './night.js';
+import { startNight, nightSkip, nightNext, nightBack, setStartDay } from './night.js';
 import {
   startDay, buildVoteTable, chVote, showVoteResult, executeVote, noExecution,
   setTimer, toggleTimer, showStatus, showHistory, checkWin,
-  priestSkip, priestActivate, hunterShoot, hunterSkip, killPlayer, fullReset,
+  priestSkip, priestActivate, hunterShoot, hunterSkip, killPlayer, revivePlayer, fullReset,
   processSheriffPassQueue, sheriffPassBadge, sheriffSkipPass
 } from './day.js';
 
@@ -51,6 +51,7 @@ window.nextDeal      = nextDeal;
 window.startNight    = startNight;
 window.nightSkip     = nightSkip;
 window.nightNext     = nightNext;
+window.nightBack     = nightBack;
 
 window.startDay      = startDay;
 window.priestSkip    = priestSkip;
@@ -67,6 +68,7 @@ window.checkWin      = checkWin;
 window.hunterShoot   = hunterShoot;
 window.hunterSkip    = hunterSkip;
 window.killPlayer    = killPlayer;
+window.revivePlayer  = revivePlayer;
 window.fullReset     = fullReset;
 window.sheriffPassBadge = sheriffPassBadge;
 window.sheriffSkipPass  = sheriffSkipPass;

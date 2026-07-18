@@ -14,11 +14,15 @@ export function buildNightOrder() {
   var r=st.roles, ord=[];
   ord.push({icon:'😴',name:'Tất cả nhắm mắt',action:'Yêu cầu mọi người nhắm mắt, cúi đầu, giữ im lặng tuyệt đối.',step:'sleep'});
   if(st.round===1&&(r.cupid||0)>0) ord.push({icon:'💘',name:'Thần Tình Yêu thức dậy',action:'Thần Tình Yêu mở mắt và chọn 2 người yêu nhau. Nhắm mắt lại.',step:'cupid'});
+  if(!st.nc.matchmakerUsed&&(r.matchmaker||0)>0) ord.push({icon:'🤝',name:'Mối Giới thức dậy',action:'Mối Giới mở mắt. Chọn 2 người kết đôi yêu nhau (1 lần duy nhất trong ván). Có thể bỏ qua để dùng đêm khác. Nhắm mắt lại.',step:'matchmaker'});
   if(st.round===1&&(r.sheriff||0)>0) ord.push({icon:'⭐',name:'Cảnh Sát Trưởng thức dậy',action:'Cảnh Sát Trưởng mở mắt. Quản trò ghi nhận (phiếu gấp đôi). Nhắm mắt lại.',step:'sheriff'});
   if(WOLF_ROLES.some(function(k){return (r[k]||0)>0;})) ord.push({icon:'🐺',name:'Phe Ma Sói thức dậy',action:'Ma Sói mở mắt, nhận ra nhau. Chọn 1 nạn nhân (hoặc bỏ qua) rồi nhắm mắt lại.',step:'wolf'});
   if((r.whitewolf||0)>0&&st.round%2===0) ord.push({icon:'🤍',name:'Sói Trắng chọn thêm',action:'Đêm chẵn — Sói Trắng có thể tiêu diệt thêm 1 người (kể cả đồng đội). Hoặc bỏ qua.',step:'whitewolf'});
+  if((r.gangleader||0)>0) ord.push({icon:'🤴',name:'Trùm Sói điều tra',action:'Trùm Sói mở mắt. Chọn 1 người để điều tra — Quản trò báo người đó có phải Dân Làng thường không. Nhắm mắt lại.',step:'gangleader'});
   if((r.seer||0)>0) ord.push({icon:'🔮',name:'Tiên Tri thức dậy',action:'Tiên Tri chọn 1 người để điều tra. Quản trò gật (Ma Sói — trừ Người Sói) hoặc lắc (Dân). Nhắm mắt lại.',step:'seer'});
+  if((r.detective||0)>0) ord.push({icon:'🕵️',name:'Thám Tử thức dậy',action:'Thám Tử mở mắt. Chọn 2 người — Quản trò báo CÓ hay KHÔNG có ít nhất 1 Ma Sói trong 2 người đó. Nhắm mắt lại.',step:'detective'});
   if((r.guard||0)>0) ord.push({icon:'🛡️',name:'Bảo Vệ thức dậy',action:'Bảo Vệ chọn 1 người bảo vệ đêm nay (không trùng đêm trước). Hoặc bỏ qua.',step:'guard'});
+  if((r.doctor||0)>0) ord.push({icon:'🩺',name:'Bác Sĩ thức dậy',action:'Bác Sĩ mở mắt. Chọn 1 người để cứu tối nay (kể cả bản thân). Không biết ai bị cắn — phán đoán! Hoặc bỏ qua.',step:'doctor'});
   if((r.witch||0)>0) ord.push({icon:'🧙',name:'Phù Thủy thức dậy',action:'Phù Thủy mở mắt. Xem nạn nhân và quyết định dùng thuốc.',step:'witch'});
   if((r.medium||0)>0&&st.players.some(function(p){return !p.alive;})) ord.push({icon:'👻',name:'Đồng Cốt thức dậy',action:'Đồng Cốt mở mắt, chỉ 1 hồn ma. Quản trò gật/lắc 1 câu hỏi có/không. Nhắm mắt lại.',step:'medium'});
   ord.push({icon:'🌅',name:'Tất cả thức dậy!',action:'Chào buổi sáng! Kết quả đêm qua được công bố.',step:'wake'});
@@ -74,6 +78,64 @@ export function buildPicker(cfg) {
       wrap.appendChild(btn);
     });
   }
+  area.appendChild(wrap);
+}
+
+// ===== DETECTIVE PICKER =====
+export function buildDetectivePicker(alive) {
+  var area=document.getElementById('night-picker-area');area.innerHTML='';
+  var wrap=document.createElement('div');wrap.className='picker-section';
+  var lbl=document.createElement('div');lbl.className='picker-label';lbl.textContent='🕵️ Chọn 2 người để điều tra:';wrap.appendChild(lbl);
+  alive.forEach(function(p){
+    var i=p._idx, sel=st.nc.detectiveCheck.includes(i);
+    var btn=document.createElement('button');btn.className='victim-btn'+(sel?' sel-acc':'');btn.id='dt-'+i;
+    btn.innerHTML='<span class="v-emoji">'+ri(p.role).emoji+'</span><span class="v-name">'+p.name+'</span><span class="v-check">✓</span>';
+    btn.onclick=function(){
+      sfx('select');
+      if(st.nc.detectiveCheck.includes(i)) st.nc.detectiveCheck=st.nc.detectiveCheck.filter(function(x){return x!==i;});
+      else if(st.nc.detectiveCheck.length<2) st.nc.detectiveCheck.push(i);
+      else{showToast('Chỉ chọn 2 người!');return;}
+      wrap.querySelectorAll('.victim-btn').forEach(function(b){b.classList.remove('sel-acc');});
+      st.nc.detectiveCheck.forEach(function(idx){var el=document.getElementById('dt-'+idx);if(el)el.classList.add('sel-acc');});
+      if(st.nc.detectiveCheck.length===2){
+        var n1=st.players[st.nc.detectiveCheck[0]].name, n2=st.players[st.nc.detectiveCheck[1]].name;
+        var hasWolf=st.nc.detectiveCheck.some(function(idx){return WOLF_ROLES.includes(st.players[idx].role)&&!ROLES[st.players[idx].role].immuneSeer;});
+        showToast(hasWolf?'🔴 TRONG 2 NGƯỜI ĐÓ: CÓ MA SÓI!':'⚪ Không có Ma Sói trong 2 người đó.',4000);
+        sfx(hasWolf?'wolf':'confirm');
+        logN('🕵️ Thám Tử kiểm tra ['+n1+', '+n2+'] → '+(hasWolf?'Có Ma Sói':'Không có Ma Sói'));
+      }
+    };
+    wrap.appendChild(btn);
+  });
+  area.appendChild(wrap);
+}
+
+// ===== MATCHMAKER PICKER =====
+export function buildMatchmakerPicker(alive) {
+  var area=document.getElementById('night-picker-area');area.innerHTML='';
+  var wrap=document.createElement('div');wrap.className='picker-section';
+  var lbl=document.createElement('div');lbl.className='picker-label';lbl.textContent='🤝 Chọn 2 người yêu nhau:';wrap.appendChild(lbl);
+  alive.forEach(function(p){
+    var i=p._idx, sel=st.nc.matchmakerNightPair.includes(i);
+    var btn=document.createElement('button');btn.className='victim-btn'+(sel?' sel-acc':'');btn.id='mm-'+i;
+    btn.innerHTML='<span class="v-emoji">'+ri(p.role).emoji+'</span><span class="v-name">'+p.name+'</span><span class="v-check">✓</span>';
+    btn.onclick=function(){
+      sfx('select');
+      if(st.nc.matchmakerNightPair.includes(i)) st.nc.matchmakerNightPair=st.nc.matchmakerNightPair.filter(function(x){return x!==i;});
+      else if(st.nc.matchmakerNightPair.length<2) st.nc.matchmakerNightPair.push(i);
+      else{showToast('Chỉ chọn 2 người!');return;}
+      wrap.querySelectorAll('.victim-btn').forEach(function(b){b.classList.remove('sel-acc');});
+      st.nc.matchmakerNightPair.forEach(function(idx){var el=document.getElementById('mm-'+idx);if(el)el.classList.add('sel-acc');});
+      if(st.nc.matchmakerNightPair.length===2){
+        var n1=st.players[st.nc.matchmakerNightPair[0]].name, n2=st.players[st.nc.matchmakerNightPair[1]].name;
+        st.nc.matchmakerPair=[].concat(st.nc.matchmakerNightPair);
+        st.nc.matchmakerUsed=true;
+        showToast('🤝 '+n1+' & '+n2+' yêu nhau!'); sfx('confirm');
+        logN('🤝 Mối Giới ghép đôi '+n1+' & '+n2);
+      }
+    };
+    wrap.appendChild(btn);
+  });
   area.appendChild(wrap);
 }
 
@@ -207,6 +269,35 @@ export function updateNight() {
   else if(s.step==='cupid') {
     buildCupidPicker(alive);
   }
+  else if(s.step==='gangleader') {
+    sfx('wolf');
+    var glAlive=st.players.some(function(p){return p.role==='gangleader'&&p.alive;});
+    if(!glAlive){showDeadRoleNotice('🤴','Trùm Sói đã chết — bỏ qua.');st.nc.gangleaderCheck=-99;return;}
+    buildPicker({label:'🤴 Trùm Sói chọn người điều tra:', players:alive, selKey:'gangleaderCheck', selClass:'sel-red', sfx:'select',
+      onSelect:function(i,p){
+        var isPlain=p.role==='villager';
+        showToast(isPlain?'✅ '+p.name+' là DÂN LÀNG THƯỜNG':'❌ '+p.name+' CÓ VAI ĐẶC BIỆT (không phải dân thường)',4000);
+        logN('🤴 Trùm Sói kiểm tra '+p.name+' → '+(isPlain?'Dân thường':'Vai đặc biệt'));
+      }
+    });
+  }
+  else if(s.step==='detective') {
+    var detAlive=st.players.some(function(p){return p.role==='detective'&&p.alive;});
+    if(!detAlive){showDeadRoleNotice('🕵️','Thám Tử đã chết — bỏ qua.');return;}
+    buildDetectivePicker(alive);
+  }
+  else if(s.step==='doctor') {
+    sfx('protect');
+    var docAlive=st.players.some(function(p){return p.role==='doctor'&&p.alive;});
+    if(!docAlive){showDeadRoleNotice('🩺','Bác Sĩ đã chết — bỏ qua.');st.nc.doctorProtect=-99;return;}
+    var allAlive=st.players.map(function(p,i){return Object.assign({},p,{_idx:i});}).filter(function(p){return p.alive;});
+    buildPicker({label:'🩺 Bác Sĩ chọn người cứu tối nay:', players:allAlive, selKey:'doctorProtect', selClass:'sel-teal', sfx:'protect', onSelect:function(i){showToast('🩺 Sẽ cứu '+st.players[i].name+' tối nay');}});
+  }
+  else if(s.step==='matchmaker') {
+    var mmAlive=st.players.some(function(p){return p.role==='matchmaker'&&p.alive;});
+    if(!mmAlive){showDeadRoleNotice('🤝','Mối Giới đã chết — bỏ qua.');return;}
+    buildMatchmakerPicker(alive);
+  }
 }
 
 export function nightSkip() {
@@ -216,6 +307,10 @@ export function nightSkip() {
   else if(s.step==='whitewolf') st.nc.whitewolfVictim=-99;
   else if(s.step==='guard') st.nc.guardProtect=-99;
   else if(s.step==='seer') st.nc.seerCheck=-99;
+  else if(s.step==='gangleader') st.nc.gangleaderCheck=-99;
+  else if(s.step==='doctor') st.nc.doctorProtect=-99;
+  else if(s.step==='detective') st.nc.detectiveCheck=[];
+  // matchmaker: bỏ qua đêm này nhưng chưa dùng — có thể dùng đêm sau
   showToast('⏭ Bỏ qua: '+s.name);
   if(st.nightStep>=st.nightOrder.length-1){sfx('confirm');_startDay();}
   else{st.nightStep++;updateNight();}

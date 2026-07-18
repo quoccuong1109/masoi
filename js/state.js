@@ -12,7 +12,13 @@ export function freshNc(prev) {
     priestUsed: prev.priestUsed || false,
     seerCheck: -1,
     cupidPair: [],
-    loverPair: prev.loverPair || []
+    loverPair: prev.loverPair || [],
+    gangleaderCheck: -1,
+    doctorProtect: -1,
+    detectiveCheck: [],
+    matchmakerUsed: prev.matchmakerUsed || false,
+    matchmakerPair: prev.matchmakerPair || [],
+    matchmakerNightPair: []
   };
 }
 

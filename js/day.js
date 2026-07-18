@@ -15,19 +15,21 @@ export function startDay() {
   document.getElementById('day-round').textContent = st.round-1;
   var nc = st.nc;
   var guardedIdx = (nc.guardProtect>=0&&nc.guardProtect!==-99) ? nc.guardProtect : -1;
+  var docIdx = (nc.doctorProtect>=0&&nc.doctorProtect!==-99) ? nc.doctorProtect : -1;
   st.nc.guardLastNight = guardedIdx;
 
   var events=[];
 
   if(nc.wolfVictim>=0&&nc.wolfVictim!==-99){
     var v=nc.wolfVictim;
-    var shielded=(v===guardedIdx)||nc.witchSave;
+    var shieldParts=[];
+    if(v===guardedIdx)shieldParts.push('🛡️ Bảo Vệ');
+    if(nc.witchSave){shieldParts.push('🧙 Phù Thủy cứu');nc.witchSaveUsed=true;}
+    if(v===docIdx)shieldParts.push('🩺 Bác Sĩ');
+    var shielded=shieldParts.length>0;
     if(shielded){
-      var r=[];
-      if(v===guardedIdx)r.push('🛡️ Bảo Vệ');
-      if(nc.witchSave){r.push('🧙 Phù Thủy cứu');nc.witchSaveUsed=true;}
-      events.push({type:'safe',idx:v,reason:'Bị cắn nhưng '+r.join(' + ')+' — an toàn!'});
-      logDay('🐺 Sói cắn '+st.players[v].name+' → '+r.join(', ')+' cứu');
+      events.push({type:'safe',idx:v,reason:'Bị cắn nhưng '+shieldParts.join(' + ')+' — an toàn!'});
+      logDay('🐺 Sói cắn '+st.players[v].name+' → '+shieldParts.join(', ')+' cứu');
     } else {
       st.players[v].alive=false;
       events.push({type:'dead',idx:v,reason:'🐺 Bị Ma Sói cắn'});
@@ -40,9 +42,10 @@ export function startDay() {
 
   if(nc.whitewolfVictim>=0&&nc.whitewolfVictim!==-99){
     var wi=nc.whitewolfVictim;
-    if(wi===guardedIdx){
-      events.push({type:'safe',idx:wi,reason:'🤍 Sói Trắng tấn công nhưng 🛡️ Bảo Vệ che chắn'});
-      logDay('🛡️ Bảo Vệ chặn Sói Trắng khỏi '+st.players[wi].name);
+    if(wi===guardedIdx||wi===docIdx){
+      var blocker=wi===guardedIdx?'🛡️ Bảo Vệ':'🩺 Bác Sĩ';
+      events.push({type:'safe',idx:wi,reason:'🤍 Sói Trắng tấn công nhưng '+blocker+' che chắn'});
+      logDay(blocker+' chặn Sói Trắng khỏi '+st.players[wi].name);
     } else if(st.players[wi].alive){
       st.players[wi].alive=false;
       events.push({type:'dead',idx:wi,reason:'🤍 Bị Sói Trắng tiêu diệt'});
@@ -89,16 +92,17 @@ export function startDay() {
 function logDay(msg) { if(st.currentLogRound) st.currentLogRound.night.push(msg); }
 
 export function checkLovers(deadIdx, events) {
-  var lp=st.nc.loverPair;
-  if(lp.length===2&&lp.includes(deadIdx)){
-    var other=lp.find(function(x){return x!==deadIdx;});
-    if(st.players[other]&&st.players[other].alive){
-      st.players[other].alive=false;
-      events.push({type:'dead',idx:other,reason:'💘 Người yêu chết — chết theo vì tình'});
-      logDay('💘 '+st.players[other].name+' chết theo người yêu');
-      triggerOnDeath(other);
+  [st.nc.loverPair, st.nc.matchmakerPair].forEach(function(lp){
+    if(lp.length===2&&lp.includes(deadIdx)){
+      var other=lp.find(function(x){return x!==deadIdx;});
+      if(st.players[other]&&st.players[other].alive){
+        st.players[other].alive=false;
+        events.push({type:'dead',idx:other,reason:'💘 Người yêu chết — chết theo vì tình'});
+        logDay('💘 '+st.players[other].name+' chết theo người yêu');
+        triggerOnDeath(other);
+      }
     }
-  }
+  });
 }
 
 export function triggerOnDeath(idx) {

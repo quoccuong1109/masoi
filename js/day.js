@@ -3,6 +3,12 @@ import { sfx } from './audio.js';
 import { st } from './state.js';
 import { goScreen, showToast, ri } from './ui.js';
 
+function processDeath() {
+  if(st.hunterQueue.length) { processHunterQueue(); return; }
+  if(st.sheriffPassQueue.length) { processSheriffPassQueue(); return; }
+  checkWin();
+}
+
 // ===== START DAY =====
 export function startDay() {
   st.round++;
@@ -77,8 +83,7 @@ export function startDay() {
   document.getElementById('vote-result-card').style.display='none';
   clearInterval(st.timerIv); st.timerRunning=false; setTimer(180);
   goScreen('s-day');
-  processHunterQueue();
-  setTimeout(checkWin, 700);
+  setTimeout(processDeath, 700);
 }
 
 function logDay(msg) { if(st.currentLogRound) st.currentLogRound.night.push(msg); }
@@ -100,6 +105,7 @@ export function triggerOnDeath(idx) {
   var role=st.players[idx].role;
   if(role==='hunter') st.hunterQueue.push({idx:idx,type:'hunter'});
   if(role==='alphawolf') st.hunterQueue.push({idx:idx,type:'alphawolf'});
+  if(st.sheriffIdx===idx) st.sheriffPassQueue.push(idx);
 }
 
 // ===== HUNTER/ALPHA POPUP =====
@@ -132,14 +138,46 @@ export function hunterShoot(item, targetIdx) {
   showToast((isAlpha?'👑':'🏹')+' '+shooter.name+' → '+t.name+' chết theo!<br><span style="color:var(--acc)">'+r.emoji+' '+r.name+'</span>',3500);
   logDay((isAlpha?'👑 Sói Đầu Đàn':'🏹 Thợ Săn')+' '+shooter.name+' → '+t.name+' chết');
   checkLovers(targetIdx,[]); triggerOnDeath(targetIdx);
-  setTimeout(function(){processHunterQueue();checkWin();},1200);
+  setTimeout(processDeath,1200);
 }
 
 export function hunterSkip() {
   sfx('click');
   document.getElementById('hunter-popup').style.display='none';
   showToast('Chọn không kéo theo/bắn ai.');
-  setTimeout(function(){processHunterQueue();checkWin();},800);
+  setTimeout(processDeath,800);
+}
+
+// ===== SHERIFF BADGE PASSING =====
+export function processSheriffPassQueue() {
+  if(!st.sheriffPassQueue.length) return;
+  st.sheriffPassQueue.shift();
+  var list=document.getElementById('sheriff-list'); list.innerHTML='';
+  st.players.forEach(function(pl,i){
+    if(!pl.alive) return;
+    var r=ri(pl.role);
+    var btn=document.createElement('button'); btn.className='victim-btn';
+    btn.innerHTML='<span class="v-emoji">'+r.emoji+'</span><span class="v-name">'+pl.name+'</span><span class="v-check">✓</span>';
+    btn.onclick=function(){sheriffPassBadge(i);};
+    list.appendChild(btn);
+  });
+  document.getElementById('sheriff-popup').style.display='flex'; sfx('click');
+}
+
+export function sheriffPassBadge(targetIdx) {
+  st.sheriffIdx=targetIdx;
+  document.getElementById('sheriff-popup').style.display='none';
+  showToast('⭐ '+st.players[targetIdx].name+' nhận huy hiệu Cảnh Sát Trưởng!',3000);
+  buildVoteTable();
+  setTimeout(processDeath,600);
+}
+
+export function sheriffSkipPass() {
+  st.sheriffIdx=-1;
+  document.getElementById('sheriff-popup').style.display='none';
+  showToast('⭐ Huy hiệu Cảnh Sát Trưởng bị thu hồi.');
+  buildVoteTable();
+  setTimeout(processDeath,600);
 }
 
 // ===== PRIEST =====
@@ -176,7 +214,7 @@ export function priestActivate(idx) {
     logDay('✝️ Linh Mục thánh hóa '+p.name+' ('+r.name+') → MA SÓI, bị loại');
     triggerOnDeath(idx); checkLovers(idx,[]);
     buildVoteTable();
-    setTimeout(function(){processHunterQueue();checkWin();},1200);
+    setTimeout(processDeath,1200);
   } else {
     showToast('✝️ '+p.name+' bị thánh hóa — là DÂN LÀNG. Quyền năng tiêu hao.',3500);
     logDay('✝️ Linh Mục thánh hóa '+p.name+' ('+r.name+') → Dân, không có gì xảy ra');
@@ -193,14 +231,19 @@ export function priestSkip() {
 // ===== VOTE =====
 export function buildVoteTable() {
   var tbl=document.getElementById('vote-table'); tbl.innerHTML=''; st.voteMap={};
+  var sheriffAlive = st.sheriffIdx>=0 && st.players[st.sheriffIdx] && st.players[st.sheriffIdx].alive;
   st.players.forEach(function(p,i){
     if(!p.alive)return;
     st.voteMap[i]=0;
     var r=ri(p.role);
+    var isSheriff = (i===st.sheriffIdx);
+    var nameTd = p.name + (isSheriff ? ' <span style="color:var(--gold);font-size:.75rem" title="Phiếu đôi">⭐×2</span>' : '');
     var tr=document.createElement('tr');
-    tr.innerHTML='<td>'+r.emoji+'</td><td style="font-weight:500">'+p.name+'</td><td><div class="vote-input-wrap"><button onclick="chVote('+i+',-1)">−</button><span id="vi-'+i+'">0</span><button onclick="chVote('+i+',1)">+</button></div></td>';
+    tr.innerHTML='<td>'+r.emoji+'</td><td style="font-weight:500">'+nameTd+'</td><td><div class="vote-input-wrap"><button onclick="chVote('+i+',-1)">−</button><span id="vi-'+i+'">0</span><button onclick="chVote('+i+',1)">+</button></div></td>';
     tbl.appendChild(tr);
   });
+  var note = document.getElementById('sheriff-vote-note');
+  if(note) note.style.display = sheriffAlive ? 'block' : 'none';
 }
 
 export function chVote(i, d) {
@@ -248,7 +291,7 @@ export function executeVote() {
   buildVoteTable();
   if(st.currentLogRound)st.gameLog.push(JSON.parse(JSON.stringify(st.currentLogRound)));
   st.currentLogRound={round:st.round,night:[],day:null};
-  setTimeout(function(){processHunterQueue();checkWin();},1200);
+  setTimeout(processDeath,1200);
 }
 
 export function noExecution() {
@@ -305,7 +348,7 @@ export function killPlayer(i) {
   triggerOnDeath(i);checkLovers(i,[]);
   showToast('💀 '+st.players[i].name+' đã chết');
   showStatus();
-  setTimeout(function(){processHunterQueue();checkWin();},800);
+  setTimeout(processDeath,800);
 }
 
 // ===== HISTORY =====
@@ -362,16 +405,28 @@ export function showHistory() {
 export function checkWin() {
   if(document.getElementById('s-win').classList.contains('active')) return;
   var alive = st.players.filter(function(p){return p.alive;});
-  var wolves = alive.filter(function(p){return WOLF_ROLES.includes(p.role);}).length;
-  var villagers = alive.length - wolves;
-  if(wolves === 0){
+  var wolves = alive.filter(function(p){return WOLF_ROLES.includes(p.role);});
+  var villagers = alive.length - wolves.length;
+
+  if(wolves.length === 0){
     sfx('win');
     setWin('🎉','DÂN LÀNG THẮNG!','Tiêu diệt toàn bộ Ma Sói sau '+st.round+' vòng!');
-  } else if(wolves >= villagers){
+    return;
+  }
+
+  // Sói Trắng thắng một mình: chỉ còn Sói Trắng (không còn sói nào khác)
+  var whitewolfAlone = wolves.length===1 && wolves[0].role==='whitewolf';
+  if(whitewolfAlone && wolves.length >= villagers){
+    sfx('win');
+    setWin('🤍','SÓI TRẮNG THẮNG!',wolves[0].name+' đã loại sạch đồng đội và chiếm đa số! Vòng '+st.round+'.');
+    return;
+  }
+
+  if(wolves.length >= villagers){
     sfx('wolf');
     setWin('🐺','MA SÓI THẮNG!','Ma Sói chiếm đa số sau '+st.round+' vòng!');
   } else {
-    showToast('🐺 '+wolves+' Ma Sói  |  👥 '+villagers+' Dân còn lại');
+    showToast('🐺 '+wolves.length+' Ma Sói  |  👥 '+villagers+' Dân còn lại');
   }
 }
 
@@ -386,8 +441,9 @@ export function setWin(emoji, title, sub) {
 
 export function fullReset() {
   clearInterval(st.timerIv);
-  st.gameOver = false; st.players=[];st.assigned=[];st.dealIdx=0;st.round=1;
+  st.gameOver=false; st.players=[];st.assigned=[];st.dealIdx=0;st.round=1;
   st.gameLog=[];st.currentLogRound=null;st.hunterQueue=[];
+  st.sheriffIdx=-1; st.sheriffPassQueue=[];
   st.nc={};st.voteMap={};
   goScreen('s-home');
 }

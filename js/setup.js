@@ -209,6 +209,7 @@ export function clearNameInputs() {
 // ===== START GAME =====
 export function startGame() {
   st.players=[]; st.gameLog=[]; st.hunterQueue=[];
+  st.sheriffIdx=-1; st.sheriffPassQueue=[];
   st.nc = freshNc();
   for(var i=0;i<st.n;i++){
     var v=document.getElementById('pn-'+i).value.trim()||'Người '+(i+1);
@@ -220,6 +221,7 @@ export function startGame() {
   shuffle(deck);
   st.assigned=deck;
   for(var i=0;i<st.n;i++)st.players[i].role=deck[i];
+  st.sheriffIdx = deck.indexOf('sheriff');
   st.dealIdx=0; st.round=1;
   showDeal(); goScreen('s-deal'); sfx('deal');
 }

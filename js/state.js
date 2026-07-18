@@ -38,5 +38,7 @@ export var st = {
   gameLog: [],
   currentLogRound: null,
   hunterQueue: [],
+  sheriffIdx: -1,
+  sheriffPassQueue: [],
   gameOver: false
 };

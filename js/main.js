@@ -8,7 +8,8 @@ import { startNight, nightSkip, nightNext, setStartDay } from './night.js';
 import {
   startDay, buildVoteTable, chVote, showVoteResult, executeVote, noExecution,
   setTimer, toggleTimer, showStatus, showHistory, checkWin,
-  priestSkip, priestActivate, hunterShoot, hunterSkip, killPlayer, fullReset
+  priestSkip, priestActivate, hunterShoot, hunterSkip, killPlayer, fullReset,
+  processSheriffPassQueue, sheriffPassBadge, sheriffSkipPass
 } from './day.js';
 
 // Break circular dependency: night calls startDay
@@ -67,3 +68,5 @@ window.hunterShoot   = hunterShoot;
 window.hunterSkip    = hunterSkip;
 window.killPlayer    = killPlayer;
 window.fullReset     = fullReset;
+window.sheriffPassBadge = sheriffPassBadge;
+window.sheriffSkipPass  = sheriffSkipPass;

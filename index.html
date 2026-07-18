@@ -26,6 +26,22 @@
   </div>
 </div>
 
+<!-- SHERIFF BADGE POPUP -->
+<div class="hunter-popup" id="sheriff-popup" style="display:none">
+  <div class="hunter-box">
+    <div class="hunter-hd">
+      <div style="font-size:2rem">⭐</div>
+      <div style="font-weight:700;font-size:1rem;color:var(--gold);margin:.3rem 0">Cảnh Sát Trưởng hi sinh!</div>
+      <div style="font-size:.8rem;color:var(--muted)">Chọn người nhận lại huy hiệu Cảnh Sát Trưởng.</div>
+    </div>
+    <div style="padding:.8rem">
+      <div class="picker-label">Trao huy hiệu cho:</div>
+      <div id="sheriff-list"></div>
+      <button class="btn btn-secondary" style="margin-top:.4rem;font-size:.84rem" onclick="sheriffSkipPass()">— Thu hồi huy hiệu</button>
+    </div>
+  </div>
+</div>
+
 <!-- HUNTER/ALPHA POPUP -->
 <div class="hunter-popup" id="hunter-popup" style="display:none">
   <div class="hunter-box">
@@ -208,7 +224,8 @@
   <div class="card">
     <div class="card-hd">🗳️ Bỏ phiếu treo cổ</div>
     <table class="vote-table" id="vote-table"></table>
-    <div style="font-size:.7rem;color:var(--muted);margin-bottom:.7rem;text-align:center">Quản trò đếm tay và nhập số phiếu</div>
+    <div style="font-size:.7rem;color:var(--muted);margin-bottom:.4rem;text-align:center">Quản trò đếm tay và nhập số phiếu</div>
+    <div id="sheriff-vote-note" style="display:none;font-size:.7rem;color:var(--gold);margin-bottom:.5rem;text-align:center;background:rgba(251,191,36,.08);border-radius:6px;padding:.35rem .6rem">⭐ Cảnh Sát Trưởng có <strong>phiếu đôi</strong> — nhân đôi số phiếu khi tính kết quả</div>
     <button class="btn btn-danger" onclick="showVoteResult()">⚡ Xem kết quả & Treo cổ</button>
   </div>
   <div class="card" id="vote-result-card" style="display:none">

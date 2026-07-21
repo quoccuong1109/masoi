@@ -1,7 +1,24 @@
 import { ROLES, WOLF_ROLES, VIL_ROLES, SKIPPABLE } from './data.js';
-import { sfx } from './audio.js';
+import { sfx, startNightBgm, stopBgm, narrate } from './audio.js?v=2';
 import { st, freshNc } from './state.js';
 import { goScreen, showToast, ri } from './ui.js';
+
+var NARRATE_MAP = {
+  'sleep':       'Màn đêm buông xuống. Tất cả nhắm mắt, cúi đầu, giữ im lặng tuyệt đối.',
+  'cupid':       'Thần Tình Yêu, hãy mở mắt và chọn hai người yêu nhau.',
+  'matchmaker':  'Mối Giới, hãy mở mắt.',
+  'sheriff':     'Cảnh Sát Trưởng, hãy nhận biết nhau.',
+  'wolf':        'Phe Ma Sói, hãy mở mắt. Hãy thống nhất và chọn nạn nhân đêm nay.',
+  'whitewolf':   'Sói Trắng, hãy mở mắt.',
+  'gangleader':  'Trùm Sói, hãy mở mắt và chọn người điều tra.',
+  'seer':        'Tiên Tri, hãy mở mắt và chọn người để soi bói.',
+  'detective':   'Thám Tử, hãy mở mắt và chọn hai người để điều tra.',
+  'guard':       'Bảo Vệ, hãy mở mắt và chọn người bạn muốn bảo vệ đêm nay.',
+  'doctor':      'Bác Sĩ, hãy mở mắt và chọn người bạn muốn cứu đêm nay.',
+  'witch':       'Phù Thủy, hãy mở mắt.',
+  'medium':      'Đồng Cốt, hãy mở mắt và hỏi hồn ma một câu.',
+  'wake':        'Bình minh đã đến. Tất cả hãy mở mắt!'
+};
 
 // Injected by main.js to break circular dep with day.js
 var _startDay = null;
@@ -42,7 +59,8 @@ export function startNight() {
     cont.appendChild(d);
   });
   st.currentLogRound = {round:st.round, night:[], day:null};
-  goScreen('s-night'); updateNight(); sfx('night');
+  sfx('night'); startNightBgm();
+  goScreen('s-night'); updateNight();
 }
 
 // ===== PICKER =====
@@ -299,6 +317,10 @@ export function updateNight() {
     if(!mmAlive){showDeadRoleNotice('🤝','Mối Giới đã chết — bỏ qua.');return;}
     buildMatchmakerPicker(alive);
   }
+  // Narration + special handling for wake step
+  if(s.step==='wake') { stopBgm(); sfx('sunrise'); }
+  var narrText = NARRATE_MAP[s.step];
+  if(narrText) setTimeout(function(){ narrate(narrText); }, s.step==='wake' ? 200 : 0);
 }
 
 export function nightBack() {

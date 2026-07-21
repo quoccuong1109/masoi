@@ -1,11 +1,13 @@
 import { st } from './state.js';
 import { ROLES } from './data.js';
+import { sfx } from './audio.js?v=2';
 
 export function goScreen(id) {
   document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
   document.getElementById(id).classList.add('active');
   window.scrollTo(0,0);
   document.getElementById('fnav').style.display = ['s-night','s-day'].includes(id) ? 'flex' : 'none';
+  if(id !== 's-home') sfx('whoosh');
 }
 
 export function showToast(msg, dur) {

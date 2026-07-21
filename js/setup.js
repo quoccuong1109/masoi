@@ -1,5 +1,5 @@
 import { ROLES, WOLF_ROLES, VIL_ROLES, POWER, calcBalance } from './data.js';
-import { sfx } from './audio.js';
+import { sfx } from './audio.js?v=2';
 import { st, freshNc } from './state.js';
 import { goScreen, showToast, ri } from './ui.js';
 

@@ -1,5 +1,5 @@
 import { WOLF_ROLES } from './data.js';
-import { sfx } from './audio.js';
+import { sfx, stopBgm } from './audio.js?v=2';
 import { st } from './state.js';
 import { goScreen, showToast, ri } from './ui.js';
 
@@ -11,6 +11,7 @@ function processDeath() {
 
 // ===== START DAY =====
 export function startDay() {
+  stopBgm();
   st.round++;
   document.getElementById('day-round').textContent = st.round-1;
   var nc = st.nc;
@@ -328,13 +329,14 @@ export function toggleTimer() {
     st.timerIv=setInterval(function(){
       if(st.timerSec<=0){
         clearInterval(st.timerIv);st.timerRunning=false;
-        sfx('alarm');showToast('⏰ HẾT GIỜ THẢO LUẬN!',3500);
+        sfx('alarm_epic');showToast('⏰ HẾT GIỜ THẢO LUẬN!',3500);
         document.getElementById('ttext').style.color='var(--rose)';
         setTimeout(function(){document.getElementById('ttext').style.color='var(--gold)';},3000);
         return;
       }
       st.timerSec--;updTimer();
-      if(st.timerSec===30||st.timerSec===10)sfx('click');
+      if(st.timerSec===30)sfx('click');
+      else if(st.timerSec>0&&st.timerSec<=10)sfx('heartbeat');
     },1000);
   }
 }
@@ -469,6 +471,7 @@ export function setWin(emoji, title, sub) {
 
 // ===== RECAP =====
 export function showRecap() {
+  sfx('reveal');
   st.prevScreen = document.querySelector('.screen.active').id;
   var cont = document.getElementById('recap-content');
   cont.innerHTML = '';

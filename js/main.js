@@ -30,6 +30,37 @@ setFnavCallback(updateHUD);
   }
 })();
 
+// ===== PWA INSTALL =====
+(function() {
+  var deferredPrompt = null;
+  // Android/Chrome: intercept install prompt
+  window.addEventListener('beforeinstallprompt', function(e) {
+    e.preventDefault();
+    deferredPrompt = e;
+    var banner = document.getElementById('pwa-banner');
+    if(banner) banner.style.display = 'block';
+    var btn = document.getElementById('pwa-install-btn');
+    if(btn) btn.onclick = function() {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(function() { deferredPrompt = null; banner.style.display = 'none'; });
+    };
+  });
+  // iOS Safari: show manual tip
+  var isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  var isInApp = window.navigator.standalone;
+  if(isIos && !isInApp) {
+    var tip = document.getElementById('pwa-ios-tip');
+    if(tip) tip.style.display = 'block';
+  }
+  // Hide banner if already installed
+  window.addEventListener('appinstalled', function() {
+    var banner = document.getElementById('pwa-banner');
+    var tip = document.getElementById('pwa-ios-tip');
+    if(banner) banner.style.display = 'none';
+    if(tip) tip.style.display = 'none';
+  });
+})();
+
 // ===== INIT =====
 initSlider();
 

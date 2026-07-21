@@ -26,6 +26,12 @@ export function setStartDay(fn) { _startDay = fn; }
 
 export function logN(msg) { if(st.currentLogRound) st.currentLogRound.night.push(msg); }
 
+function logNReplace(prefix, msg) {
+  if(!st.currentLogRound) return;
+  st.currentLogRound.night = st.currentLogRound.night.filter(function(e){ return !e.startsWith(prefix); });
+  st.currentLogRound.night.push(msg);
+}
+
 // ===== NIGHT ORDER =====
 export function buildNightOrder() {
   var r=st.roles, ord=[];
@@ -120,7 +126,7 @@ export function buildDetectivePicker(alive) {
         var hasWolf=st.nc.detectiveCheck.some(function(idx){return WOLF_ROLES.includes(st.players[idx].role)&&!ROLES[st.players[idx].role].immuneSeer;});
         showToast(hasWolf?'🔴 TRONG 2 NGƯỜI ĐÓ: CÓ MA SÓI!':'⚪ Không có Ma Sói trong 2 người đó.',4000);
         sfx(hasWolf?'wolf':'confirm');
-        logN('🕵️ Thám Tử kiểm tra ['+n1+', '+n2+'] → '+(hasWolf?'Có Ma Sói':'Không có Ma Sói'));
+        logNReplace('🕵️ Thám Tử', '🕵️ Thám Tử kiểm tra ['+n1+', '+n2+'] → '+(hasWolf?'Có Ma Sói':'Không có Ma Sói'));
       }
     };
     wrap.appendChild(btn);
@@ -261,7 +267,7 @@ export function updateNight() {
       onSelect:function(i,p){
         var isWolf = WOLF_ROLES.includes(p.role) && !ROLES[p.role].immuneSeer;
         showToast(isWolf?'🔴 '+p.name+' là MA SÓI!':'⚪ '+p.name+' là DÂN LÀNG',3500);
-        logN('🔮 Tiên Tri soi '+p.name+' → '+(isWolf?'MA SÓI':'Dân'));
+        logNReplace('🔮 Tiên Tri', '🔮 Tiên Tri soi '+p.name+' → '+(isWolf?'MA SÓI':'Dân'));
       }
     });
   }
@@ -274,7 +280,7 @@ export function updateNight() {
     var lbl = '🛡️ Bảo Vệ chọn người bảo vệ:';
     if(last>=0&&st.players[last]) lbl += ' (không chọn lại '+st.players[last].name+')';
     if(!avail.length){showDeadRoleNotice('🛡️','Không còn ai khác để bảo vệ đêm nay.');st.nc.guardProtect=-99;return;}
-    buildPicker({label:lbl, players:avail, selKey:'guardProtect', selClass:'sel-sky', sfx:'protect', onSelect:function(i){showToast('🛡️ Đang bảo vệ '+st.players[i].name); logN('🛡️ Bảo Vệ chọn bảo vệ '+st.players[i].name);}});
+    buildPicker({label:lbl, players:avail, selKey:'guardProtect', selClass:'sel-sky', sfx:'protect', onSelect:function(i){showToast('🛡️ Đang bảo vệ '+st.players[i].name); logNReplace('🛡️ Bảo Vệ', '🛡️ Bảo Vệ chọn bảo vệ '+st.players[i].name);}});
   }
   else if(s.step==='witch') {
     var witchAlive = st.players.some(function(p){return p.role==='witch'&&p.alive;});
@@ -296,7 +302,7 @@ export function updateNight() {
       onSelect:function(i,p){
         var isPlain=p.role==='villager';
         showToast(isPlain?'✅ '+p.name+' là DÂN LÀNG THƯỜNG':'❌ '+p.name+' CÓ VAI ĐẶC BIỆT (không phải dân thường)',4000);
-        logN('🤴 Trùm Sói kiểm tra '+p.name+' → '+(isPlain?'Dân thường':'Vai đặc biệt'));
+        logNReplace('🤴 Trùm Sói', '🤴 Trùm Sói kiểm tra '+p.name+' → '+(isPlain?'Dân thường':'Vai đặc biệt'));
       }
     });
   }
@@ -310,7 +316,7 @@ export function updateNight() {
     var docAlive=st.players.some(function(p){return p.role==='doctor'&&p.alive;});
     if(!docAlive){showDeadRoleNotice('🩺','Bác Sĩ đã chết — bỏ qua.');st.nc.doctorProtect=-99;return;}
     var allAlive=st.players.map(function(p,i){return Object.assign({},p,{_idx:i});}).filter(function(p){return p.alive;});
-    buildPicker({label:'🩺 Bác Sĩ chọn người cứu tối nay:', players:allAlive, selKey:'doctorProtect', selClass:'sel-teal', sfx:'protect', onSelect:function(i){showToast('🩺 Sẽ cứu '+st.players[i].name+' tối nay'); logN('🩺 Bác Sĩ chọn cứu '+st.players[i].name);}});
+    buildPicker({label:'🩺 Bác Sĩ chọn người cứu tối nay:', players:allAlive, selKey:'doctorProtect', selClass:'sel-teal', sfx:'protect', onSelect:function(i){showToast('🩺 Sẽ cứu '+st.players[i].name+' tối nay'); logNReplace('🩺 Bác Sĩ', '🩺 Bác Sĩ chọn cứu '+st.players[i].name);}});
   }
   else if(s.step==='matchmaker') {
     var mmAlive=st.players.some(function(p){return p.role==='matchmaker'&&p.alive;});

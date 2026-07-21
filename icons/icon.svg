@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#08080f"/>
+  <circle cx="245" cy="218" r="135" fill="#6d28d9"/>
+  <circle cx="302" cy="192" r="105" fill="#08080f"/>
+  <circle cx="100" cy="88" r="5" fill="#fbbf24" opacity=".8"/>
+  <circle cx="400" cy="68" r="3.5" fill="#fbbf24" opacity=".65"/>
+  <circle cx="432" cy="168" r="3" fill="#fbbf24" opacity=".7"/>
+  <circle cx="64" cy="196" r="2.5" fill="#fbbf24" opacity=".55"/>
+  <circle cx="372" cy="108" r="4" fill="#fbbf24" opacity=".6"/>
+  <circle cx="148" cy="340" r="2" fill="#a78bfa" opacity=".4"/>
+  <text x="256" y="400" text-anchor="middle"
+    font-family="-apple-system,system-ui,sans-serif"
+    font-size="76" font-weight="800" fill="#a78bfa" letter-spacing="2">MA SÓI</text>
+  <text x="256" y="448" text-anchor="middle"
+    font-family="-apple-system,system-ui,sans-serif"
+    font-size="28" fill="#7c3aed" letter-spacing="5" opacity=".85">GAME MASTER</text>
+</svg>

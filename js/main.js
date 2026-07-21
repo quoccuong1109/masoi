@@ -1,19 +1,22 @@
-import { goScreen, showToast, goBack } from './ui.js';
+import { goScreen, showToast, goBack, setFnavCallback } from './ui.js?v=2';
 import {
   randomRoles, buildRoleSections, togglePin, chRole, chVil, syncVil,
   openRolePopup, goSetupPlayers, clearNameInputs, startGame,
-  removePlayer, fillFromSaved, flipCard, nextDeal, initSlider
-} from './setup.js';
-import { startNight, nightSkip, nightNext, nightBack, setStartDay } from './night.js';
+  removePlayer, fillFromSaved, flipCard, nextDeal, initSlider,
+  renderPresets, savePresetUI, applyPreset
+} from './setup.js?v=2';
+import { startNight, nightSkip, nightNext, nightBack, setStartDay } from './night.js?v=2';
 import {
   startDay, buildVoteTable, chVote, showVoteResult, executeVote, noExecution,
   setTimer, toggleTimer, showStatus, showHistory, checkWin, showRecap,
   priestSkip, priestActivate, hunterShoot, hunterSkip, killPlayer, revivePlayer, fullReset,
-  processSheriffPassQueue, sheriffPassBadge, sheriffSkipPass
-} from './day.js';
+  processSheriffPassQueue, sheriffPassBadge, sheriffSkipPass, updateHUD
+} from './day.js?v=2';
 
 // Break circular dependency: night calls startDay
 setStartDay(startDay);
+// HUD callback: refresh wolf/vil count whenever s-day or s-night becomes active
+setFnavCallback(updateHUD);
 
 // ===== STARS =====
 (function() {
@@ -73,3 +76,7 @@ window.revivePlayer  = revivePlayer;
 window.fullReset     = fullReset;
 window.sheriffPassBadge = sheriffPassBadge;
 window.sheriffSkipPass  = sheriffSkipPass;
+
+window.renderPresets = renderPresets;
+window.savePresetUI  = savePresetUI;
+window.applyPreset   = applyPreset;

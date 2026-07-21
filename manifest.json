@@ -1,0 +1,19 @@
+{
+  "name": "Ma Sói – Game Master",
+  "short_name": "Ma Sói",
+  "description": "Công cụ quản trò Ma Sói chuyên nghiệp – by anhgiaochilang",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#08080f",
+  "theme_color": "#7c3aed",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

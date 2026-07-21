@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Ma Sói - anhgiaochilang</title>
 <link rel="stylesheet" href="css/main.css">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#7c3aed">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ma Sói">
+<link rel="apple-touch-icon" href="icons/icon.svg">
 </head>
 <body>
 <div id="stars"></div>
@@ -112,6 +118,14 @@
     </div>
   </div>
   <div id="role-warn" style="font-size:.76rem;color:var(--rose);margin-bottom:.5rem;display:none;text-align:center">⚠️ Tổng vai không khớp số người!</div>
+  <div class="card" style="margin-top:.3rem">
+    <div class="card-hd">💾 Cấu hình đã lưu</div>
+    <div id="preset-list"></div>
+    <div style="display:flex;gap:.5rem;margin-top:.4rem;align-items:center">
+      <input class="inp" id="preset-name-inp" placeholder="Tên cấu hình..." style="margin:0;flex:1">
+      <button class="btn btn-secondary btn-sm" onclick="savePresetUI()" style="flex-shrink:0;white-space:nowrap;padding:.48rem .9rem">💾 Lưu</button>
+    </div>
+  </div>
   <div style="width:100%;max-width:380px">
     <button class="btn btn-primary" onclick="goSetupPlayers()">✨ Tiếp theo — Nhập tên</button>
   </div>
@@ -298,11 +312,21 @@
 </div>
 
 <div id="fnav">
-  <button class="btn btn-secondary btn-sm" onclick="showStatus()" style="flex:1;max-width:130px">📋 DS</button>
-  <button class="btn btn-secondary btn-sm" onclick="showHistory()" style="flex:1;max-width:130px">📜 LS</button>
-  <button class="btn btn-secondary btn-sm" onclick="checkWin()" style="flex:1;max-width:130px">🏆?</button>
+  <div id="fnav-hud">🐺 <span id="hud-wolves" style="color:var(--rose);font-weight:700">—</span> &nbsp;·&nbsp; 👥 <span id="hud-vil" style="color:var(--teal);font-weight:700">—</span> &nbsp;·&nbsp; ✝ <span id="hud-dead" style="font-weight:700">—</span></div>
+  <div style="display:flex;gap:.5rem;justify-content:center">
+    <button class="btn btn-secondary btn-sm" onclick="showStatus()" style="flex:1;max-width:130px">📋 DS</button>
+    <button class="btn btn-secondary btn-sm" onclick="showHistory()" style="flex:1;max-width:130px">📜 LS</button>
+    <button class="btn btn-secondary btn-sm" onclick="checkWin()" style="flex:1;max-width:130px">🏆?</button>
+  </div>
 </div>
 
-<script type="module" src="js/main.js"></script>
+<script type="module" src="js/main.js?v=2"></script>
+<script>
+if('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('./sw.js').catch(function(){});
+  });
+}
+</script>
 </body>
 </html>

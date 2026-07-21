@@ -1,7 +1,7 @@
 import { WOLF_ROLES } from './data.js';
 import { sfx, stopBgm } from './audio.js?v=2';
 import { st } from './state.js';
-import { goScreen, showToast, ri } from './ui.js';
+import { goScreen, showToast, ri } from './ui.js?v=2';
 
 function processDeath() {
   if(st.hunterQueue.length) { processHunterQueue(); return; }
@@ -144,9 +144,22 @@ export function processHunterQueue() {
   document.getElementById('hunter-popup').style.display='flex'; sfx('wolf');
 }
 
+export function updateHUD() {
+  var wolves = st.players.filter(function(p){ return p.alive && WOLF_ROLES.includes(p.role); }).length;
+  var vil = st.players.filter(function(p){ return p.alive && !WOLF_ROLES.includes(p.role); }).length;
+  var dead = st.players.filter(function(p){ return !p.alive; }).length;
+  var hw = document.getElementById('hud-wolves');
+  var hv = document.getElementById('hud-vil');
+  var hd = document.getElementById('hud-dead');
+  if(hw) hw.textContent = wolves;
+  if(hv) hv.textContent = vil;
+  if(hd) hd.textContent = dead;
+}
+
 export function hunterShoot(item, targetIdx) {
   sfx('hang');
   var t=st.players[targetIdx]; t.alive=false;
+  updateHUD();
   document.getElementById('hunter-popup').style.display='none';
   var r=ri(t.role), shooter=st.players[item.idx];
   var isAlpha=item.type==='alphawolf', isCub=item.type==='cub';
@@ -228,6 +241,7 @@ export function priestActivate(idx) {
   sfx(isWolf?'hang':'click');
   if(isWolf){
     p.alive=false;
+    updateHUD();
     showToast('✝️ '+p.name+' bị thánh hóa — là MA SÓI! '+r.emoji+' '+r.name+' bị loại!',4000);
     logDay('✝️ Linh Mục thánh hóa '+p.name+' ('+r.name+') → MA SÓI, bị loại');
     triggerOnDeath(idx); checkLovers(idx,[]);
@@ -543,4 +557,5 @@ export function fullReset() {
   st.sheriffIdx=-1; st.sheriffPassQueue=[];
   st.nc={};st.voteMap={};
   goScreen('s-home');
+  if(window.renderPresets) window.renderPresets();
 }

@@ -1,7 +1,7 @@
 import { ROLES, WOLF_ROLES, VIL_ROLES, SKIPPABLE } from './data.js';
 import { sfx, startNightBgm, stopBgm, narrate } from './audio.js?v=2';
 import { st, freshNc } from './state.js';
-import { goScreen, showToast, ri } from './ui.js';
+import { goScreen, showToast, ri } from './ui.js?v=2';
 
 var NARRATE_MAP = {
   'sleep':       'Màn đêm buông xuống. Tất cả nhắm mắt, cúi đầu, giữ im lặng tuyệt đối.',

@@ -1,7 +1,7 @@
 import { ROLES, WOLF_ROLES, VIL_ROLES, POWER, calcBalance } from './data.js';
 import { sfx } from './audio.js?v=2';
 import { st, freshNc } from './state.js';
-import { goScreen, showToast, ri } from './ui.js';
+import { goScreen, showToast, ri } from './ui.js?v=2';
 
 function shuffle(a) { for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;} }
 
@@ -283,4 +283,82 @@ export function initSlider() {
     st.roles = suggestRoles(st.n);
     buildRoleSections(); sfx('click');
   };
+  renderPresets();
+}
+
+// ===== PRESETS =====
+var PRESET_KEY = 'masoi_presets_v1';
+
+export function listPresets() {
+  try { return JSON.parse(localStorage.getItem(PRESET_KEY)) || []; } catch(e) { return []; }
+}
+
+export function renderPresets() {
+  var presets = listPresets();
+  var list = document.getElementById('preset-list');
+  if(!list) return;
+  list.innerHTML = '';
+  if(!presets.length) {
+    list.innerHTML = '<div style="font-size:.75rem;color:var(--muted);text-align:center;padding:.25rem 0 .4rem">Chưa có cấu hình lưu nào.</div>';
+    return;
+  }
+  presets.forEach(function(p, idx) {
+    var chip = document.createElement('div');
+    chip.style.cssText = 'display:flex;align-items:center;gap:.4rem;padding:.4rem .65rem;background:var(--surf2);border:1px solid var(--border);border-radius:8px;margin-bottom:.3rem;cursor:pointer;transition:border-color .15s;';
+    var nameSpan = document.createElement('span');
+    nameSpan.style.cssText = 'flex:1;font-size:.82rem;font-weight:600;color:var(--text);';
+    nameSpan.textContent = p.name;
+    var infoSpan = document.createElement('span');
+    infoSpan.style.cssText = 'font-size:.7rem;color:var(--muted);flex-shrink:0;';
+    infoSpan.textContent = p.n + ' người';
+    var delBtn = document.createElement('button');
+    delBtn.style.cssText = 'background:none;border:none;color:var(--muted);font-size:.82rem;cursor:pointer;padding:2px 5px;border-radius:4px;flex-shrink:0;';
+    delBtn.textContent = '✕';
+    delBtn.title = 'Xoá';
+    delBtn.onclick = function(e) { e.stopPropagation(); deletePresetByIdx(idx); };
+    chip.appendChild(nameSpan);
+    chip.appendChild(infoSpan);
+    chip.appendChild(delBtn);
+    chip.onclick = function() { applyPreset(p); };
+    list.appendChild(chip);
+  });
+}
+
+export function applyPreset(preset) {
+  sfx('confirm');
+  st.n = preset.n;
+  st.roles = Object.assign({}, preset.roles);
+  var slider = document.getElementById('sl-total');
+  var disp = document.getElementById('total-disp');
+  if(slider) slider.value = st.n;
+  if(disp) disp.textContent = st.n;
+  buildRoleSections();
+  syncVil();
+  showToast('✓ Đã tải: ' + preset.name);
+}
+
+export function savePresetUI() {
+  var inp = document.getElementById('preset-name-inp');
+  var name = inp ? inp.value.trim() : '';
+  if(!name) { showToast('⚠️ Nhập tên cấu hình trước!'); return; }
+  sfx('confirm');
+  var presets = listPresets();
+  presets = presets.filter(function(p){ return p.name !== name; });
+  presets.unshift({ name: name, n: st.n, roles: Object.assign({}, st.roles) });
+  if(presets.length > 6) presets = presets.slice(0, 6);
+  try { localStorage.setItem(PRESET_KEY, JSON.stringify(presets)); } catch(e) {}
+  if(inp) inp.value = '';
+  showToast('💾 Đã lưu: ' + name);
+  renderPresets();
+}
+
+function deletePresetByIdx(idx) {
+  sfx('click');
+  var presets = listPresets();
+  if(idx < 0 || idx >= presets.length) return;
+  var name = presets[idx].name;
+  presets.splice(idx, 1);
+  try { localStorage.setItem(PRESET_KEY, JSON.stringify(presets)); } catch(e) {}
+  showToast('🗑 Đã xoá: ' + name);
+  renderPresets();
 }

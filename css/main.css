@@ -71,7 +71,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 .timer-ring{position:relative;width:90px;height:90px;margin:.4rem auto;}
 .timer-ring svg{transform:rotate(-90deg);}
 .timer-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.35rem;font-weight:700;color:var(--gold);}
-.toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:var(--surf2);border:1px solid var(--acc);color:var(--text);padding:.6rem 1.3rem;border-radius:12px;font-size:.84rem;z-index:9999;display:none;text-align:center;max-width:92%;box-shadow:0 0 20px var(--glow);animation:toastIn .25s ease;}
+.toast{position:fixed;bottom:5rem;left:50%;transform:translateX(-50%);background:var(--surf2);border:1px solid var(--acc);color:var(--text);padding:.6rem 1.3rem;border-radius:12px;font-size:.84rem;z-index:9999;display:none;text-align:center;max-width:92%;box-shadow:0 0 20px var(--glow);animation:toastIn .25s ease;}
 @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(8px)}}
 .win-emoji{font-size:5rem;text-align:center;animation:bob 1s infinite alternate;}
 @keyframes bob{to{transform:translateY(-8px)}}
@@ -136,7 +136,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 .hunter-popup{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:600;display:flex;align-items:center;justify-content:center;padding:1rem;}
 .hunter-box{background:var(--surf);border:2px solid var(--rose);border-radius:var(--r);width:100%;max-width:340px;overflow:hidden;animation:slideUp .25s ease;}
 .hunter-hd{background:rgba(251,113,133,.1);padding:1rem;text-align:center;border-bottom:1px solid rgba(251,113,133,.2);}
-#fnav{display:none;position:fixed;bottom:1rem;right:1rem;z-index:100;flex-direction:column;gap:4px;align-items:flex-end;}
+#fnav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:200;flex-direction:row;justify-content:center;gap:.5rem;padding:.55rem 1rem calc(.55rem + env(safe-area-inset-bottom));background:var(--surf);border-top:1px solid var(--border);backdrop-filter:blur(8px);}
 .inp{width:100%;background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:.48rem .8rem;color:var(--text);font-family:'Be Vietnam Pro',sans-serif;font-size:.86rem;outline:none;transition:border .2s;margin-bottom:.4rem;}
 .inp:focus{border-color:var(--acc);}
 .team-wolf{color:var(--rose);}

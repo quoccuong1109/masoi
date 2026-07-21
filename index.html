@@ -278,9 +278,22 @@
     <div style="height:1.5rem"></div>
     <div style="width:100%;max-width:380px;display:flex;flex-direction:column;gap:.45rem">
       <button class="btn btn-primary" onclick="fullReset()">🔄 Chơi ván mới</button>
+      <button class="btn btn-secondary" onclick="showRecap()">📖 Xem lại câu chuyện</button>
       <button class="btn btn-secondary" onclick="goBack()">← Quay lại</button>
     </div>
     <div style="font-size:.62rem;color:var(--muted);margin-top:.5rem;letter-spacing:1px">MA SÓI · by anhgiaochilang</div>
+  </div>
+</div>
+
+<!-- RECAP -->
+<div class="screen" id="s-recap">
+  <div class="logo-wrap">
+    <div class="logo-main" style="font-size:1.3rem">📖 Hồi Ký Ván Đấu</div>
+    <div class="logo-tag">by anhgiaochilang</div>
+  </div>
+  <div id="recap-content" style="width:100%;max-width:380px;margin-top:.5rem"></div>
+  <div style="width:100%;max-width:380px;margin-bottom:1rem">
+    <button class="btn btn-secondary" onclick="goBack()">← Quay lại</button>
   </div>
 </div>
 

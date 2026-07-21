@@ -256,7 +256,7 @@ export function updateNight() {
     var lbl = '🛡️ Bảo Vệ chọn người bảo vệ:';
     if(last>=0&&st.players[last]) lbl += ' (không chọn lại '+st.players[last].name+')';
     if(!avail.length){showDeadRoleNotice('🛡️','Không còn ai khác để bảo vệ đêm nay.');st.nc.guardProtect=-99;return;}
-    buildPicker({label:lbl, players:avail, selKey:'guardProtect', selClass:'sel-sky', sfx:'protect', onSelect:function(i){showToast('🛡️ Đang bảo vệ '+st.players[i].name);}});
+    buildPicker({label:lbl, players:avail, selKey:'guardProtect', selClass:'sel-sky', sfx:'protect', onSelect:function(i){showToast('🛡️ Đang bảo vệ '+st.players[i].name); logN('🛡️ Bảo Vệ chọn bảo vệ '+st.players[i].name);}});
   }
   else if(s.step==='witch') {
     var witchAlive = st.players.some(function(p){return p.role==='witch'&&p.alive;});
@@ -292,7 +292,7 @@ export function updateNight() {
     var docAlive=st.players.some(function(p){return p.role==='doctor'&&p.alive;});
     if(!docAlive){showDeadRoleNotice('🩺','Bác Sĩ đã chết — bỏ qua.');st.nc.doctorProtect=-99;return;}
     var allAlive=st.players.map(function(p,i){return Object.assign({},p,{_idx:i});}).filter(function(p){return p.alive;});
-    buildPicker({label:'🩺 Bác Sĩ chọn người cứu tối nay:', players:allAlive, selKey:'doctorProtect', selClass:'sel-teal', sfx:'protect', onSelect:function(i){showToast('🩺 Sẽ cứu '+st.players[i].name+' tối nay');}});
+    buildPicker({label:'🩺 Bác Sĩ chọn người cứu tối nay:', players:allAlive, selKey:'doctorProtect', selClass:'sel-teal', sfx:'protect', onSelect:function(i){showToast('🩺 Sẽ cứu '+st.players[i].name+' tối nay'); logN('🩺 Bác Sĩ chọn cứu '+st.players[i].name);}});
   }
   else if(s.step==='matchmaker') {
     var mmAlive=st.players.some(function(p){return p.role==='matchmaker'&&p.alive;});

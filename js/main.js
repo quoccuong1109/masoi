@@ -7,7 +7,7 @@ import {
 import { startNight, nightSkip, nightNext, nightBack, setStartDay } from './night.js';
 import {
   startDay, buildVoteTable, chVote, showVoteResult, executeVote, noExecution,
-  setTimer, toggleTimer, showStatus, showHistory, checkWin,
+  setTimer, toggleTimer, showStatus, showHistory, checkWin, showRecap,
   priestSkip, priestActivate, hunterShoot, hunterSkip, killPlayer, revivePlayer, fullReset,
   processSheriffPassQueue, sheriffPassBadge, sheriffSkipPass
 } from './day.js';
@@ -65,6 +65,7 @@ window.noExecution   = noExecution;
 window.showStatus    = showStatus;
 window.showHistory   = showHistory;
 window.checkWin      = checkWin;
+window.showRecap     = showRecap;
 window.hunterShoot   = hunterShoot;
 window.hunterSkip    = hunterSkip;
 window.killPlayer    = killPlayer;

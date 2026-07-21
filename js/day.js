@@ -297,7 +297,7 @@ export function executeVote() {
   sfx('hang');
   var p=st.players[st.voteTopIdx]; p.alive=false;
   var r=ri(p.role);
-  if(st.currentLogRound)st.currentLogRound.day={voted:st.voteTopIdx,executed:true,name:p.name,role:r.name};
+  if(st.currentLogRound)st.currentLogRound.day={voted:st.voteTopIdx,executed:true,name:p.name,role:r.name,roleEmoji:r.emoji,isWolf:WOLF_ROLES.includes(p.role)};
   showToast('🪢 '+p.name+' bị treo cổ!<br><span style="color:var(--acc)">'+r.emoji+' '+r.name+'</span>',3500);
   if(p.role==='fool'){
     setTimeout(function(){sfx('win');setWin('🃏','KẺ NGỐC THẮNG!',p.name+' bị treo cổ đúng kế hoạch! Vòng '+st.round+'.');},1200);
@@ -465,6 +465,72 @@ export function setWin(emoji, title, sub) {
   document.getElementById('win-title').textContent = title;
   document.getElementById('win-sub').textContent = sub;
   goScreen('s-win');
+}
+
+// ===== RECAP =====
+export function showRecap() {
+  st.prevScreen = document.querySelector('.screen.active').id;
+  var cont = document.getElementById('recap-content');
+  cont.innerHTML = '';
+  var logs = st.gameLog.slice();
+  if(!logs.length){
+    cont.innerHTML='<div class="info-box" style="text-align:center;color:var(--muted)">Chưa có dữ liệu để kể lại.</div>';
+    goScreen('s-recap'); return;
+  }
+  var deadCount=st.players.filter(function(p){return !p.alive;}).length;
+  var wolfCount=st.players.filter(function(p){return WOLF_ROLES.includes(p.role);}).length;
+  var hdr=document.createElement('div');
+  hdr.style.cssText='background:var(--surf2);border:1px solid var(--border);border-radius:12px;padding:.8rem 1rem;margin-bottom:.8rem;';
+  hdr.innerHTML='<div style="font-size:.72rem;font-weight:700;color:var(--acc);letter-spacing:2px;text-transform:uppercase;margin-bottom:.5rem">📊 Tổng kết ván đấu</div>'+
+    '<div style="display:flex;gap:1.2rem;flex-wrap:wrap;">'+
+    '<div style="font-size:.82rem"><span style="color:var(--muted)">Người chơi</span><br><strong style="font-size:1.1rem;color:var(--text)">'+st.n+'</strong></div>'+
+    '<div style="font-size:.82rem"><span style="color:var(--muted)">Số vòng</span><br><strong style="font-size:1.1rem;color:var(--gold)">'+logs.length+'</strong></div>'+
+    '<div style="font-size:.82rem"><span style="color:var(--muted)">Đã chết</span><br><strong style="font-size:1.1rem;color:var(--rose)">'+deadCount+'</strong></div>'+
+    '<div style="font-size:.82rem"><span style="color:var(--muted)">Ma Sói</span><br><strong style="font-size:1.1rem;color:var(--rose)">'+wolfCount+'</strong></div>'+
+    '</div>';
+  cont.appendChild(hdr);
+  logs.forEach(function(log){
+    var rd=document.createElement('div'); rd.className='recap-round';
+    var nhd=document.createElement('div'); nhd.className='recap-night-hd'; nhd.textContent='🌙 Đêm '+log.round; rd.appendChild(nhd);
+    if(log.night.length){
+      log.night.forEach(function(msg){
+        var e=document.createElement('div');
+        var cls='recap-event'+( msg.startsWith('💀')||msg.startsWith('🐺 Sói cắn')||msg.startsWith('☠️')||msg.startsWith('🤍')||msg.startsWith('🪢')||msg.startsWith('✝️')||msg.startsWith('💘') ? ' recap-dead' :
+          msg.startsWith('🛡️')||msg.startsWith('🩺')||msg.startsWith('💊') ? ' recap-safe' :
+          msg.startsWith('🔮')||msg.startsWith('🕵️')||msg.startsWith('🤴')||msg.startsWith('💘 Cupid')||msg.startsWith('🤝') ? ' recap-info' : '');
+        e.className=cls; e.innerHTML='<span class="recap-bullet">▸</span> '+msg; rd.appendChild(e);
+      });
+    } else {
+      var e=document.createElement('div'); e.className='recap-event recap-quiet'; e.innerHTML='<span class="recap-bullet">▸</span> ✨ Đêm bình yên'; rd.appendChild(e);
+    }
+    var dhd=document.createElement('div'); dhd.className='recap-day-hd'; dhd.textContent='☀️ Ngày '+log.round; rd.appendChild(dhd);
+    if(log.day&&log.day.executed){
+      var iw=log.day.isWolf;
+      var de=document.createElement('div'); de.className='recap-event '+(iw?'recap-dead':'recap-miss');
+      de.innerHTML='<span class="recap-bullet">▸</span> 🪢 Treo cổ <strong>'+log.day.name+'</strong> '+(log.day.roleEmoji||'')+' <span style="font-size:.76rem;color:var(--muted)">'+log.day.role+'</span> '+
+        (iw?'<span class="recap-tag recap-tag-wolf">Sói 🐺</span>':'<span class="recap-tag recap-tag-vil">Dân ✓</span>');
+      rd.appendChild(de);
+    } else if(log.day&&!log.day.executed){
+      var de=document.createElement('div'); de.className='recap-event recap-quiet';
+      de.innerHTML='<span class="recap-bullet">▸</span> 🕊️ Không ai bị treo cổ'; rd.appendChild(de);
+    } else {
+      var de=document.createElement('div'); de.className='recap-event recap-quiet';
+      de.innerHTML='<span class="recap-bullet">▸</span> (Chưa có kết quả ngày)'; rd.appendChild(de);
+    }
+    cont.appendChild(rd);
+  });
+  var revd=document.createElement('div'); revd.className='recap-round';
+  var rvhd=document.createElement('div'); rvhd.className='recap-night-hd recap-reveal-hd'; rvhd.textContent='🎭 Lộ mặt — Toàn bộ vai trò'; revd.appendChild(rvhd);
+  st.players.forEach(function(p){
+    var r=ri(p.role), iw=WOLF_ROLES.includes(p.role);
+    var e=document.createElement('div'); e.className='recap-event';
+    e.innerHTML=(p.alive?'<span style="color:var(--teal)">✓</span>':'<span style="color:var(--rose)">✝</span>')+
+      ' '+r.emoji+' <strong>'+p.name+'</strong> <span style="font-size:.74rem;color:'+(iw?'var(--rose)':'var(--muted)')+'">'+r.name+'</span>'+
+      (iw?' <span class="recap-tag recap-tag-wolf">Sói</span>':'');
+    revd.appendChild(e);
+  });
+  cont.appendChild(revd);
+  goScreen('s-recap');
 }
 
 export function fullReset() {

@@ -137,6 +137,21 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;heigh
 .hunter-box{background:var(--surf);border:2px solid var(--rose);border-radius:var(--r);width:100%;max-width:340px;overflow:hidden;animation:slideUp .25s ease;}
 .hunter-hd{background:rgba(251,113,133,.1);padding:1rem;text-align:center;border-bottom:1px solid rgba(251,113,133,.2);}
 #fnav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:200;flex-direction:row;justify-content:center;gap:.5rem;padding:.55rem 1rem calc(.55rem + env(safe-area-inset-bottom));background:var(--surf);border-top:1px solid var(--border);backdrop-filter:blur(8px);}
+.recap-round{margin-bottom:.75rem;border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.recap-night-hd{background:linear-gradient(135deg,rgba(124,58,237,.18),rgba(79,70,229,.1));padding:.55rem 1rem;font-size:.8rem;font-weight:700;color:var(--acc);letter-spacing:1px;}
+.recap-reveal-hd{background:linear-gradient(135deg,rgba(251,191,36,.15),rgba(217,119,6,.1));color:var(--gold);}
+.recap-day-hd{background:rgba(251,191,36,.06);border-top:1px solid rgba(251,191,36,.12);padding:.4rem 1rem;font-size:.72rem;font-weight:700;color:var(--gold);letter-spacing:1px;}
+.recap-event{padding:.4rem 1rem;font-size:.81rem;border-bottom:1px solid rgba(167,139,250,.05);color:var(--text);line-height:1.6;}
+.recap-event:last-child{border-bottom:none;}
+.recap-bullet{opacity:.4;margin-right:4px;}
+.recap-dead{color:var(--rose);}
+.recap-miss{color:var(--sky);}
+.recap-safe{color:var(--teal);}
+.recap-info{color:var(--acc);}
+.recap-quiet{color:var(--muted);}
+.recap-tag{font-size:.68rem;border-radius:4px;padding:1px 6px;margin-left:4px;font-weight:600;}
+.recap-tag-wolf{background:rgba(251,113,133,.15);color:var(--rose);}
+.recap-tag-vil{background:rgba(52,211,153,.12);color:var(--teal);}
 .inp{width:100%;background:var(--surf2);border:1px solid var(--border);border-radius:8px;padding:.48rem .8rem;color:var(--text);font-family:'Be Vietnam Pro',sans-serif;font-size:.86rem;outline:none;transition:border .2s;margin-bottom:.4rem;}
 .inp:focus{border-color:var(--acc);}
 .team-wolf{color:var(--rose);}

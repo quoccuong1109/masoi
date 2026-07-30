@@ -1,17 +1,17 @@
-import { goScreen, showToast, goBack, setFnavCallback } from './ui.js?v=3';
+import { goScreen, showToast, goBack, setFnavCallback } from './ui.js?v=4';
 import {
   randomRoles, buildRoleSections, togglePin, chRole, chVil, syncVil,
   openRolePopup, goSetupPlayers, clearNameInputs, startGame,
   removePlayer, fillFromSaved, flipCard, nextDeal, initSlider,
   renderPresets, savePresetUI, applyPreset
-} from './setup.js?v=3';
-import { startNight, nightSkip, nightNext, nightBack, setStartDay } from './night.js?v=3';
+} from './setup.js?v=4';
+import { startNight, nightSkip, nightNext, nightBack, setStartDay } from './night.js?v=4';
 import {
   startDay, buildVoteTable, chVote, showVoteResult, executeVote, noExecution,
   setTimer, toggleTimer, showStatus, showHistory, checkWin, showRecap,
   priestSkip, priestActivate, hunterShoot, hunterSkip, killPlayer, revivePlayer, fullReset,
   processSheriffPassQueue, sheriffPassBadge, sheriffSkipPass, updateHUD
-} from './day.js?v=3';
+} from './day.js?v=4';
 
 // Break circular dependency: night calls startDay
 setStartDay(startDay);

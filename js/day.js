@@ -1,7 +1,7 @@
-import { WOLF_ROLES } from './data.js?v=3';
-import { sfx, stopBgm } from './audio.js?v=3';
-import { st } from './state.js?v=3';
-import { goScreen, showToast, ri } from './ui.js?v=3';
+import { WOLF_ROLES } from './data.js?v=4';
+import { sfx, stopBgm } from './audio.js?v=4';
+import { st } from './state.js?v=4';
+import { goScreen, showToast, ri } from './ui.js?v=4';
 
 function processDeath() {
   if(st.hunterQueue.length) { processHunterQueue(); return; }
@@ -16,6 +16,7 @@ export function startDay() {
   document.getElementById('day-round').textContent = st.round-1;
   var nc = st.nc;
   var guardedIdx = (nc.guardProtect>=0&&nc.guardProtect!==-99) ? nc.guardProtect : -1;
+  var wolfGuardedIdx = (nc.wolfGuardProtect>=0&&nc.wolfGuardProtect!==-99) ? nc.wolfGuardProtect : -1;
   st.nc.guardLastNight = guardedIdx;
   var hadDoubleKill = st.wolfDoubleKill;
 
@@ -26,6 +27,7 @@ export function startDay() {
     var shieldParts=[];
     if(v===guardedIdx)shieldParts.push('🛡️ Bảo Vệ');
     if(nc.witchSave){shieldParts.push('🧙 Phù Thủy cứu');nc.witchSaveUsed=true;}
+    if(nc.exorcistBlock>=0&&nc.exorcistBlock!==-99&&v===nc.exorcistBlock){shieldParts.push('☯️ Thầy Trừ Tà');nc.exorcistUsed=true;}
     var shielded=shieldParts.length>0;
     if(!shielded&&st.players[v].role==='elder'&&!st.players[v].elderHit){
       st.players[v].elderHit=true; shielded=true; shieldParts=['🧓 Người Già (1 HP còn lại)'];
@@ -43,22 +45,24 @@ export function startDay() {
     logDay('🐺 Ma Sói bỏ qua đêm nay');
   }
 
-  if(hadDoubleKill&&nc.wolfVictim2>=0&&nc.wolfVictim2!==-99){
-    var v2=nc.wolfVictim2;
-    if(st.players[v2]&&st.players[v2].alive){
-      var shielded2=v2===guardedIdx;
-      if(!shielded2&&st.players[v2].role==='elder'&&!st.players[v2].elderHit){
-        st.players[v2].elderHit=true; shielded2=true;
-      }
-      if(shielded2){
-        var bl2=v2===guardedIdx?'🛡️ Bảo Vệ':'🧓 Người Già';
-        events.push({type:'safe',idx:v2,reason:'🐶 Sói cắn lần 2 nhưng '+bl2+' che chắn'});
-        logDay(bl2+' chặn Sói cắn thứ 2 khỏi '+st.players[v2].name);
-      } else {
-        st.players[v2].alive=false;
-        events.push({type:'dead',idx:v2,reason:'🐶 Bị Ma Sói cắn lần 2 (Sói Con báo thù)'});
-        logDay('💀 '+st.players[v2].name+' chết do Sói cắn lần 2 (Sói Con)');
-        checkLovers(v2,events); triggerOnDeath(v2);
+  if(hadDoubleKill){
+    if(nc.wolfVictim2>=0&&nc.wolfVictim2!==-99){
+      var v2=nc.wolfVictim2;
+      if(st.players[v2]&&st.players[v2].alive){
+        var shielded2=v2===guardedIdx;
+        if(!shielded2&&st.players[v2].role==='elder'&&!st.players[v2].elderHit){
+          st.players[v2].elderHit=true; shielded2=true;
+        }
+        if(shielded2){
+          var bl2=v2===guardedIdx?'🛡️ Bảo Vệ':'🧓 Người Già';
+          events.push({type:'safe',idx:v2,reason:'🐶 Sói cắn lần 2 nhưng '+bl2+' che chắn'});
+          logDay(bl2+' chặn Sói cắn thứ 2 khỏi '+st.players[v2].name);
+        } else {
+          st.players[v2].alive=false;
+          events.push({type:'dead',idx:v2,reason:'🐶 Bị Ma Sói cắn lần 2 (Sói Con báo thù)'});
+          logDay('💀 '+st.players[v2].name+' chết do Sói cắn lần 2 (Sói Con)');
+          checkLovers(v2,events); triggerOnDeath(v2);
+        }
       }
     }
     st.wolfDoubleKill=false;
@@ -66,12 +70,12 @@ export function startDay() {
 
   if(nc.whitewolfVictim>=0&&nc.whitewolfVictim!==-99){
     var wi=nc.whitewolfVictim;
-    var shieldedWW=wi===guardedIdx;
+    var shieldedWW=wi===guardedIdx||wi===wolfGuardedIdx;
     if(!shieldedWW&&st.players[wi].role==='elder'&&!st.players[wi].elderHit){
       st.players[wi].elderHit=true; shieldedWW=true;
     }
     if(shieldedWW){
-      var blockerWW=wi===guardedIdx?'🛡️ Bảo Vệ':'🧓 Người Già';
+      var blockerWW=wi===guardedIdx?'🛡️ Bảo Vệ':wi===wolfGuardedIdx?'🛡️🐺 Sói Bảo Vệ':'🧓 Người Già';
       events.push({type:'safe',idx:wi,reason:'🤍 Sói Trắng tấn công nhưng '+blockerWW+' che chắn'});
       logDay(blockerWW+' chặn Sói Trắng khỏi '+st.players[wi].name);
     } else if(st.players[wi].alive){
@@ -85,9 +89,10 @@ export function startDay() {
   if(nc.witchPoison>=0&&nc.witchPoison!==-99){
     nc.witchPoisonUsed=true;
     var pi=nc.witchPoison;
-    if(pi===guardedIdx){
-      events.push({type:'safe',idx:pi,reason:'☠️ Bị đầu độc nhưng 🛡️ Bảo Vệ che chắn'});
-      logDay('🛡️ Bảo Vệ chặn thuốc độc khỏi '+st.players[pi].name);
+    if(pi===guardedIdx||pi===wolfGuardedIdx){
+      var blockerP=pi===guardedIdx?'🛡️ Bảo Vệ':'🛡️🐺 Sói Bảo Vệ';
+      events.push({type:'safe',idx:pi,reason:'☠️ Bị đầu độc nhưng '+blockerP+' che chắn'});
+      logDay(blockerP+' chặn thuốc độc khỏi '+st.players[pi].name);
     } else if(st.players[pi].alive){
       st.players[pi].alive=false;
       events.push({type:'dead',idx:pi,reason:'☠️ Bị Phù Thủy đầu độc'});
@@ -100,10 +105,19 @@ export function startDay() {
     nc.whiteWitchUsed=true;
     var ri2=nc.whiteWitchRevive;
     st.players[ri2].alive=true;
-    events.push({type:'revive',idx:ri2});
+    events.push({type:'revive',idx:ri2,reason:'🌟 Phù Thủy Trắng hồi sinh'});
     logDay('🌟 Phù Thủy Trắng hồi sinh '+st.players[ri2].name);
   }
 
+  if(nc.demonWolfRevive>=0&&nc.demonWolfRevive!==-99){
+    nc.demonWolfUsed=true;
+    var dwr=nc.demonWolfRevive;
+    st.players[dwr].alive=true;
+    events.push({type:'revive',idx:dwr,reason:'😈 Ác Quỷ hồi sinh'});
+    logDay('😈 Ác Quỷ hồi sinh '+st.players[dwr].name);
+  }
+
+  updateHUD();
   if(!events.length) { events.push({type:'quiet'}); logDay('✨ Đêm bình yên'); }
 
   var box=document.getElementById('night-result-box');
@@ -113,7 +127,7 @@ export function startDay() {
     if(e.type==='quiet')return '<div class="result-row quiet-row"><span>✨</span><span>Đêm bình yên — không ai chết!</span></div>';
     var p=st.players[e.idx], r=ri(p.role);
     if(e.type==='dead')return '<div class="result-row dead-row"><span style="font-size:1rem">'+r.emoji+'</span><div><strong>'+p.name+'</strong><br><span style="font-size:.74rem;color:var(--muted)">'+e.reason+'</span><br><span style="font-size:.72rem;color:var(--rose)">Vai: '+r.name+'</span></div></div>';
-    if(e.type==='revive')return '<div class="result-row safe-row"><span style="font-size:1rem">🌟</span><div><strong>'+p.name+'</strong><br><span style="font-size:.74rem;color:var(--teal)">✨ Được Phù Thủy Trắng hồi sinh!</span></div></div>';
+    if(e.type==='revive'){var rIcon=e.reason&&e.reason.startsWith('😈')?'😈':'🌟';return '<div class="result-row safe-row"><span style="font-size:1rem">'+rIcon+'</span><div><strong>'+p.name+'</strong><br><span style="font-size:.74rem;color:var(--teal)">'+(e.reason||'✨ Được hồi sinh!')+'</span></div></div>';}
     return '<div class="result-row safe-row"><span style="font-size:1rem">'+r.emoji+'</span><div><strong>'+p.name+'</strong><br><span style="font-size:.74rem;color:var(--teal)">'+e.reason+'</span></div></div>';
   }).join('');
 
@@ -156,6 +170,7 @@ export function triggerOnDeath(idx) {
     var wcIdx=st.players.findIndex(function(p){return p.alive&&p.role==='wildchild';});
     if(wcIdx>=0){
       st.players[wcIdx].role='wolf';
+      updateHUD();
       showToast('🧒→🐺 Trẻ Em Hoang Dã mất hình mẫu — bí mật gia nhập Ma Sói!',4000);
       logDay('🐺 Trẻ Em Hoang Dã đổi phe sang Ma Sói (hình mẫu '+st.players[idx].name+' chết)');
     }
@@ -198,7 +213,17 @@ export function updateHUD() {
 
 export function hunterShoot(item, targetIdx) {
   sfx('hang');
-  var t=st.players[targetIdx]; t.alive=false;
+  var t=st.players[targetIdx];
+  if(t.role==='wolfElder'&&!t.elderWolfHit){
+    t.elderWolfHit=true;
+    var isAlpha2=item.type==='alphawolf';
+    showToast((isAlpha2?'👑':'🏹')+' '+st.players[item.idx].name+' → '+t.name+' bị nhắm nhưng Sói Già sống sót! (Lần 1)',3500);
+    logDay((isAlpha2?'👑 Sói Đầu Đàn':'🏹 Thợ Săn')+' '+st.players[item.idx].name+' → '+t.name+' (Sói Già) sống sót lần 1');
+    document.getElementById('hunter-popup').style.display='none';
+    setTimeout(processDeath,1200);
+    return;
+  }
+  t.alive=false;
   updateHUD();
   document.getElementById('hunter-popup').style.display='none';
   var r=ri(t.role), shooter=st.players[item.idx];
@@ -279,6 +304,14 @@ export function priestActivate(idx) {
   st.nc.priestUsed=true;
   sfx(isWolf?'hang':'click');
   if(isWolf){
+    if(p.role==='wolfElder'&&!p.elderWolfHit){
+      p.elderWolfHit=true;
+      sfx('click');
+      showToast('✝️ '+p.name+' bị thánh hóa nhưng SỐNG SÓT! Là Sói Già — lần 2 mới chết.',3500);
+      logDay('✝️ Linh Mục thánh hóa '+p.name+' (Sói Già) → sống sót lần đầu');
+      document.getElementById('priest-card').style.display='none';
+      return;
+    }
     p.alive=false;
     updateHUD();
     showToast('✝️ '+p.name+' bị thánh hóa — là MA SÓI! '+r.emoji+' '+r.name+' bị loại!',4000);
@@ -340,7 +373,16 @@ export function showVoteResult() {
   var exSec=document.getElementById('vote-execute-section');
   var exLbl=document.getElementById('vote-execute-label');
   if(maxV===0){exSec.style.display='none';}
-  else if(tops.length>1){exSec.style.display='block';exLbl.textContent='Hoà '+tops.length+' người! Không treo cổ ai.';st.voteTopIdx=-1;}
+  else if(tops.length>1){
+    var sgAlive=alive.filter(function(p){return p.role==='scapegoat';});
+    if(sgAlive.length){
+      st.voteTopIdx=sgAlive[0].i;
+      exSec.style.display='block';
+      exLbl.innerHTML='⚖️ Hoà phiếu! → 🐑 <strong>'+sgAlive[0].name+'</strong> (Vật Tế Thần) tự động bị hành quyết!';
+    } else {
+      exSec.style.display='block';exLbl.textContent='Hoà '+tops.length+' người! Không treo cổ ai.';st.voteTopIdx=-1;
+    }
+  }
   else{st.voteTopIdx=tops[0].i;exSec.style.display='block';exLbl.innerHTML='⚡ <strong>'+tops[0].name+'</strong> nhiều phiếu nhất ('+maxV+' phiếu)';}
   document.getElementById('vote-result-card').style.display='block';
   document.getElementById('vote-result-card').scrollIntoView({behavior:'smooth',block:'nearest'});

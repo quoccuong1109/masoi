@@ -1,7 +1,7 @@
-import { ROLES, WOLF_ROLES, VIL_ROLES, SKIPPABLE } from './data.js?v=3';
-import { sfx, startNightBgm, stopBgm, narrate } from './audio.js?v=3';
-import { st, freshNc } from './state.js?v=3';
-import { goScreen, showToast, ri } from './ui.js?v=3';
+import { ROLES, WOLF_ROLES, VIL_ROLES, SKIPPABLE } from './data.js?v=4';
+import { sfx, startNightBgm, stopBgm, narrate } from './audio.js?v=4';
+import { st, freshNc } from './state.js?v=4';
+import { goScreen, showToast, ri } from './ui.js?v=4';
 
 var NARRATE_MAP = {
   'sleep':       'Màn đêm buông xuống. Tất cả nhắm mắt, cúi đầu, giữ im lặng tuyệt đối.',
@@ -13,6 +13,10 @@ var NARRATE_MAP = {
   'whitewolf':   'Sói Trắng, hãy mở mắt.',
   'gangleader':  'Trùm Sói, hãy mở mắt và chọn người điều tra.',
   'sorcerer':    'Pháp Sư, hãy mở mắt và chọn người điều tra.',
+  'seducer':     'Kẻ Cám Dỗ, hãy mở mắt và chọn người bị mê hoặc đêm nay.',
+  'wolfGuard':   'Sói Bảo Vệ, hãy mở mắt và chọn đồng đội cần bảo vệ đêm nay.',
+  'wolfSpy':     'Thám Tử Sói, hãy mở mắt và chọn người điều tra.',
+  'demonWolf':   'Ác Quỷ, hãy mở mắt.',
   'seer':        'Tiên Tri, hãy mở mắt và chọn người để soi bói.',
   'detective':   'Thám Tử, hãy mở mắt và chọn hai người để điều tra.',
   'guard':       'Bảo Vệ, hãy mở mắt và chọn người bạn muốn bảo vệ đêm nay.',
@@ -21,6 +25,10 @@ var NARRATE_MAP = {
   'wildchild':   'Trẻ Em Hoang Dã, hãy mở mắt và chọn hình mẫu của mình.',
   'fox':         'Cáo, hãy mở mắt và chọn ba người để điều tra.',
   'whiteWitch':  'Phù Thủy Trắng, hãy mở mắt.',
+  'pi':          'Thám Tử Tư, hãy mở mắt và chọn người điều tra.',
+  'witness':     'Quản trò báo bí mật cho Người Chứng Kiến.',
+  'exorcist':    'Thầy Trừ Tà, hãy mở mắt và chọn người cần bảo vệ đêm nay.',
+  'oracle':      'Bói Toán, hãy mở mắt và chọn hồn ma để đọc vai.',
   'wake':        'Bình minh đã đến. Tất cả hãy mở mắt!'
 };
 
@@ -44,18 +52,26 @@ export function buildNightOrder() {
   if(st.round===1&&(r.wildchild||0)>0) ord.push({icon:'🧒',name:'Trẻ Em Hoang Dã thức dậy',action:'Trẻ Em Hoang Dã mở mắt, chọn 1 người làm hình mẫu. Nếu hình mẫu chết → Trẻ Em đổi sang phe Ma Sói! Nhắm mắt lại.',step:'wildchild'});
   if(!st.nc.matchmakerUsed&&(r.matchmaker||0)>0) ord.push({icon:'🤝',name:'Mối Giới thức dậy',action:'Mối Giới mở mắt. Chọn 2 người kết đôi yêu nhau (1 lần duy nhất trong ván). Có thể bỏ qua để dùng đêm khác. Nhắm mắt lại.',step:'matchmaker'});
   if(st.round===1&&(r.sheriff||0)>0) ord.push({icon:'⭐',name:'Cảnh Sát Trưởng thức dậy',action:'Cảnh Sát Trưởng mở mắt. Quản trò ghi nhận (phiếu gấp đôi). Nhắm mắt lại.',step:'sheriff'});
+  if((r.seducer||0)>0) ord.push({icon:'💋',name:'Kẻ Cám Dỗ thức dậy',action:'Kẻ Cám Dỗ mở mắt. Chọn 1 người bị mê hoặc — người đó mất khả năng đặc biệt đêm nay. Nhắm mắt lại.',step:'seducer'});
   if(WOLF_ROLES.some(function(k){return (r[k]||0)>0;})) ord.push({icon:'🐺',name:'Phe Ma Sói thức dậy',action:'Ma Sói mở mắt, nhận ra nhau. Chọn 1 nạn nhân (hoặc bỏ qua) rồi nhắm mắt lại.',step:'wolf'});
   if(st.wolfDoubleKill) ord.push({icon:'🐶🐺',name:'Ma Sói cắn người thứ 2 (Sói Con)',action:'Sói Con đã chết! Phe Ma Sói được cắn thêm 1 nạn nhân nữa để báo thù. Chọn nạn nhân thứ 2.',step:'wolf2'});
   if((r.whitewolf||0)>0&&st.round%2===0) ord.push({icon:'🤍',name:'Sói Trắng chọn thêm',action:'Đêm chẵn — Sói Trắng có thể tiêu diệt thêm 1 người (kể cả đồng đội). Hoặc bỏ qua.',step:'whitewolf'});
+  if((r.witness||0)>0) ord.push({icon:'👁️',name:'Người Chứng Kiến nhận tin',action:'Quản trò âm thầm thông báo riêng cho Người Chứng Kiến biết Ma Sói đêm nay nhắm vào ai.',step:'witness'});
+  if((r.wolfGuard||0)>0) ord.push({icon:'🛡️🐺',name:'Sói Bảo Vệ thức dậy',action:'Sói Bảo Vệ mở mắt. Chọn 1 đồng đội Ma Sói để bảo vệ đêm nay (khỏi thuốc độc, Sói Trắng,...). Nhắm mắt lại.',step:'wolfGuard'});
+  if((r.wolfSpy||0)>0) ord.push({icon:'🔎',name:'Thám Tử Sói thức dậy',action:'Thám Tử Sói mở mắt. Chọn 1 người — Quản trò tiết lộ vai trò chính xác. Nhắm mắt lại.',step:'wolfSpy'});
+  if(!st.nc.demonWolfUsed&&(r.demonWolf||0)>0&&st.players.some(function(p){return !p.alive&&WOLF_ROLES.includes(p.role);})) ord.push({icon:'😈',name:'Ác Quỷ thức dậy',action:'Ác Quỷ mở mắt. Một lần duy nhất: chọn 1 Ma Sói đã chết để hồi sinh vào sáng mai. Hoặc bỏ qua.',step:'demonWolf'});
   if((r.gangleader||0)>0) ord.push({icon:'🤴',name:'Trùm Sói điều tra',action:'Trùm Sói mở mắt. Chọn 1 người để điều tra — Quản trò báo người đó có phải Dân Làng thường không. Nhắm mắt lại.',step:'gangleader'});
-  if((r.sorcerer||0)>0) ord.push({icon:'🧿',name:'Pháp Sư điều tra',action:'Pháp Sư mở mắt. Chọn 1 người — Quản trò gật nếu đó là Tiên Tri, lắc nếu không phải. Nhắm mắt lại.',step:'sorcerer'});
+  if((r.sorcerer||0)>0) ord.push({icon:'🧿',name:'Pháp Sư [Sói] điều tra',action:'Pháp Sư (phe Sói) mở mắt. Chọn 1 người — Quản trò gật nếu đó là Tiên Tri, lắc nếu không phải. Nhắm mắt lại.',step:'sorcerer'});
   if((r.seer||0)>0) ord.push({icon:'🔮',name:'Tiên Tri thức dậy',action:'Tiên Tri chọn 1 người để điều tra. Quản trò gật (Ma Sói — trừ Người Sói) hoặc lắc (Dân). Nhắm mắt lại.',step:'seer'});
   if((r.detective||0)>0) ord.push({icon:'🕵️',name:'Thám Tử thức dậy',action:'Thám Tử mở mắt. Chọn 2 người — Quản trò báo CÓ hay KHÔNG có ít nhất 1 Ma Sói trong 2 người đó. Nhắm mắt lại.',step:'detective'});
+  if((r.pi||0)>0) ord.push({icon:'🔍',name:'Thám Tử Tư thức dậy',action:'Thám Tử Tư mở mắt. Chọn 1 người — Quản trò tiết lộ vai trò chính xác. Nhắm mắt lại.',step:'pi'});
   if((r.guard||0)>0) ord.push({icon:'🛡️',name:'Bảo Vệ thức dậy',action:'Bảo Vệ chọn 1 người bảo vệ đêm nay (không trùng đêm trước). Hoặc bỏ qua.',step:'guard'});
+  if(!st.nc.exorcistUsed&&(r.exorcist||0)>0) ord.push({icon:'☯️',name:'Thầy Trừ Tà thức dậy',action:'Thầy Trừ Tà mở mắt. Một lần duy nhất: chọn 1 người để bảo vệ khỏi tấn công của Ma Sói đêm nay. Nhắm mắt lại.',step:'exorcist'});
   if((r.witch||0)>0) ord.push({icon:'🧙',name:'Phù Thủy thức dậy',action:'Phù Thủy mở mắt. Xem nạn nhân và quyết định dùng thuốc.',step:'witch'});
   if((r.medium||0)>0&&st.players.some(function(p){return !p.alive;})) ord.push({icon:'👻',name:'Đồng Cốt thức dậy',action:'Đồng Cốt mở mắt, chỉ 1 hồn ma. Quản trò gật/lắc 1 câu hỏi có/không. Nhắm mắt lại.',step:'medium'});
   if(!st.foxAbilityLost&&(r.fox||0)>0) ord.push({icon:'🦊',name:'Cáo thức dậy',action:'Cáo mở mắt. Chọn 3 người để điều tra — Quản trò báo có Ma Sói trong nhóm đó không. Nhắm mắt lại.',step:'fox'});
   if(!st.nc.whiteWitchUsed&&(r.whiteWitch||0)>0&&st.players.some(function(p){return !p.alive;})) ord.push({icon:'🌟',name:'Phù Thủy Trắng thức dậy',action:'Phù Thủy Trắng mở mắt. Chọn 1 người đã chết để hồi sinh (hoặc bỏ qua). Nhắm mắt lại.',step:'whiteWitch'});
+  if((r.oracle||0)>0&&st.players.some(function(p){return !p.alive;})) ord.push({icon:'🔮🌙',name:'Bói Toán thức dậy',action:'Bói Toán mở mắt. Chọn 1 hồn ma — Quản trò tiết lộ vai trò chính xác. Nhắm mắt lại.',step:'oracle'});
   ord.push({icon:'🌅',name:'Tất cả thức dậy!',action:'Chào buổi sáng! Kết quả đêm qua được công bố.',step:'wake'});
   return ord;
 }
@@ -131,12 +147,11 @@ export function buildDetectivePicker(alive) {
       st.nc.detectiveCheck.forEach(function(idx){var el=document.getElementById('dt-'+idx);if(el)el.classList.add('sel-acc');});
       if(st.nc.detectiveCheck.length===2){
         var n1=st.players[st.nc.detectiveCheck[0]].name, n2=st.players[st.nc.detectiveCheck[1]].name;
-        var wolfIdxs=st.nc.detectiveCheck.filter(function(idx){return WOLF_ROLES.includes(st.players[idx].role)&&!ROLES[st.players[idx].role].immuneSeer;});
-        if(wolfIdxs.length>0){
-          var wolfNames=wolfIdxs.map(function(idx){return st.players[idx].name;}).join(', ');
-          showToast('🔴 CÓ MA SÓI! → '+wolfNames+' là Ma Sói!',4000);
+        var hasWolf=st.nc.detectiveCheck.some(function(idx){return WOLF_ROLES.includes(st.players[idx].role)&&!ROLES[st.players[idx].role].immuneSeer;});
+        if(hasWolf){
+          showToast('🔴 TRONG 2 NGƯỜI ĐÓ: CÓ MA SÓI!',4000);
           sfx('wolf');
-          logNReplace('🕵️ Thám Tử','🕵️ Thám Tử điều tra ['+n1+', '+n2+'] → '+wolfNames+' là Ma Sói');
+          logNReplace('🕵️ Thám Tử','🕵️ Thám Tử điều tra ['+n1+', '+n2+'] → Có Ma Sói');
         } else {
           showToast('⚪ Không có Ma Sói trong 2 người đó.',4000);
           sfx('confirm');
@@ -314,6 +329,14 @@ export function buildWhiteWitchPicker() {
   area.appendChild(wrap);
 }
 
+// Returns true if the player with the given role has been seduced this night
+function roleSeduced(role) {
+  var idx = st.nc.seducedIdx;
+  if(idx < 0 || idx === -99) return false;
+  var p = st.players[idx];
+  return p && p.role === role;
+}
+
 // ===== UPDATE NIGHT STEP =====
 export function updateNight() {
   var s = st.nightOrder[st.nightStep];
@@ -350,6 +373,7 @@ export function updateNight() {
   else if(s.step==='seer') {
     var seerAlive = st.players.some(function(p){return p.role==='seer'&&p.alive;});
     if(!seerAlive){showDeadRoleNotice('🔮','Tiên Tri đã chết — bỏ qua.');return;}
+    if(roleSeduced('seer')){showDeadRoleNotice('🔮','💋 Tiên Tri bị cám dỗ — mất khả năng đêm nay!');return;}
     buildPicker({label:'🔮 Tiên Tri điều tra 1 người:', players:alive, selKey:'seerCheck', selClass:'sel-acc', sfx:'select',
       onSelect:function(i,p){
         var isWolf = WOLF_ROLES.includes(p.role) && !ROLES[p.role].immuneSeer;
@@ -362,6 +386,7 @@ export function updateNight() {
     sfx('protect');
     var guardAlive = st.players.some(function(p){return p.role==='guard'&&p.alive;});
     if(!guardAlive){showDeadRoleNotice('🛡️','Bảo Vệ đã chết — bỏ qua.');st.nc.guardProtect=-99;return;}
+    if(roleSeduced('guard')){showDeadRoleNotice('🛡️','💋 Bảo Vệ bị cám dỗ — mất khả năng đêm nay!');st.nc.guardProtect=-99;return;}
     var last = st.nc.guardLastNight;
     var avail = alive.filter(function(p){return p._idx!==last;});
     var lbl = '🛡️ Bảo Vệ chọn người bảo vệ:';
@@ -372,6 +397,7 @@ export function updateNight() {
   else if(s.step==='witch') {
     var witchAlive = st.players.some(function(p){return p.role==='witch'&&p.alive;});
     if(!witchAlive){showDeadRoleNotice('🧙','Phù Thủy đã chết — bỏ qua.');return;}
+    if(roleSeduced('witch')){showDeadRoleNotice('🧙','💋 Phù Thủy bị cám dỗ — mất khả năng đêm nay!');return;}
     buildWitchPicker(alive);
   }
   else if(s.step==='medium') {
@@ -409,6 +435,7 @@ export function updateNight() {
   else if(s.step==='detective') {
     var detAlive=st.players.some(function(p){return p.role==='detective'&&p.alive;});
     if(!detAlive){showDeadRoleNotice('🕵️','Thám Tử đã chết — bỏ qua.');return;}
+    if(roleSeduced('detective')){showDeadRoleNotice('🕵️','💋 Thám Tử bị cám dỗ — mất khả năng đêm nay!');return;}
     buildDetectivePicker(alive);
   }
   else if(s.step==='wildchild') {
@@ -425,17 +452,135 @@ export function updateNight() {
   else if(s.step==='matchmaker') {
     var mmAlive=st.players.some(function(p){return p.role==='matchmaker'&&p.alive;});
     if(!mmAlive){showDeadRoleNotice('🤝','Mối Giới đã chết — bỏ qua.');return;}
+    if(roleSeduced('matchmaker')){showDeadRoleNotice('🤝','💋 Mối Giới bị cám dỗ — mất khả năng đêm nay!');return;}
     buildMatchmakerPicker(alive);
   }
   else if(s.step==='fox') {
     var foxAlive=st.players.some(function(p){return p.role==='fox'&&p.alive;});
     if(!foxAlive){showDeadRoleNotice('🦊','Cáo đã chết — bỏ qua.');return;}
+    if(roleSeduced('fox')){showDeadRoleNotice('🦊','💋 Cáo bị cám dỗ — mất khả năng đêm nay!');return;}
     buildFoxPicker(alive);
   }
   else if(s.step==='whiteWitch') {
     var wwAliveRole=st.players.some(function(p){return p.role==='whiteWitch'&&p.alive;});
     if(!wwAliveRole){showDeadRoleNotice('🌟','Phù Thủy Trắng đã chết — bỏ qua.');return;}
+    if(roleSeduced('whiteWitch')){showDeadRoleNotice('🌟','💋 Phù Thủy Trắng bị cám dỗ — mất khả năng đêm nay!');return;}
     buildWhiteWitchPicker();
+  }
+  else if(s.step==='seducer') {
+    sfx('wolf');
+    var sedAlive=st.players.some(function(p){return p.role==='seducer'&&p.alive;});
+    if(!sedAlive){showDeadRoleNotice('💋','Kẻ Cám Dỗ đã chết — bỏ qua.');st.nc.seducedIdx=-99;return;}
+    buildPicker({label:'💋 Kẻ Cám Dỗ chọn người bị mê hoặc đêm nay:', players:alive, selKey:'seducedIdx', selClass:'sel-red', sfx:'wolf',
+      onSelect:function(i,p){showToast('💋 Đêm nay '+p.name+' bị cám dỗ — mất khả năng!');logNReplace('💋 Kẻ Cám Dỗ','💋 Kẻ Cám Dỗ mê hoặc '+p.name);}
+    });
+  }
+  else if(s.step==='wolfGuard') {
+    sfx('wolf');
+    var wgAlive=st.players.some(function(p){return p.role==='wolfGuard'&&p.alive;});
+    if(!wgAlive){showDeadRoleNotice('🛡️🐺','Sói Bảo Vệ đã chết — bỏ qua.');st.nc.wolfGuardProtect=-99;return;}
+    var aliveWolves=st.players.map(function(p,i){return Object.assign({},p,{_idx:i});}).filter(function(p){return p.alive&&WOLF_ROLES.includes(p.role);});
+    if(!aliveWolves.length){showDeadRoleNotice('🛡️🐺','Không còn Ma Sói nào để bảo vệ.');st.nc.wolfGuardProtect=-99;return;}
+    buildPicker({label:'🛡️🐺 Sói Bảo Vệ chọn đồng đội cần bảo vệ:', players:aliveWolves, selKey:'wolfGuardProtect', selClass:'sel-red', sfx:'protect',
+      onSelect:function(i,p){showToast('🛡️🐺 Bảo vệ '+p.name+' tối nay');logNReplace('🛡️🐺 Sói Bảo Vệ','🛡️🐺 Sói Bảo Vệ chọn bảo vệ '+p.name);}
+    });
+  }
+  else if(s.step==='wolfSpy') {
+    sfx('wolf');
+    var wsAlive=st.players.some(function(p){return p.role==='wolfSpy'&&p.alive;});
+    if(!wsAlive){showDeadRoleNotice('🔎','Thám Tử Sói đã chết — bỏ qua.');st.nc.wolfSpyCheck=-99;return;}
+    buildPicker({label:'🔎 Thám Tử Sói chọn người điều tra:', players:alive, selKey:'wolfSpyCheck', selClass:'sel-red', sfx:'select',
+      onSelect:function(i,p){
+        var r2=ri(p.role);
+        showToast('🔎 '+p.name+': '+r2.emoji+' '+r2.name,3500);sfx('select');
+        logNReplace('🔎 Thám Tử Sói','🔎 Thám Tử Sói điều tra '+p.name+' → '+r2.name);
+      }
+    });
+  }
+  else if(s.step==='demonWolf') {
+    sfx('wolf');
+    var dwAlive=st.players.some(function(p){return p.role==='demonWolf'&&p.alive;});
+    if(!dwAlive){showDeadRoleNotice('😈','Ác Quỷ đã chết — bỏ qua.');return;}
+    var deadWolves=st.players.map(function(p,i){return Object.assign({},p,{_idx:i});}).filter(function(p){return !p.alive&&WOLF_ROLES.includes(p.role);});
+    if(!deadWolves.length){showDeadRoleNotice('😈','Chưa có Ma Sói nào đã chết để hồi sinh.');return;}
+    var area2=document.getElementById('night-picker-area');area2.innerHTML='';
+    var wrap2=document.createElement('div');wrap2.className='picker-section';
+    var lbl2=document.createElement('div');lbl2.className='picker-label';lbl2.textContent='😈 Ác Quỷ chọn Ma Sói cần hồi sinh (1 lần duy nhất):';wrap2.appendChild(lbl2);
+    deadWolves.forEach(function(p){
+      var i=p._idx;
+      var btn2=document.createElement('button');btn2.className='victim-btn'+(st.nc.demonWolfRevive===i?' sel-red':'');
+      btn2.innerHTML='<span class="v-emoji">'+ri(p.role).emoji+'</span><span class="v-name">'+p.name+' ✝</span><span class="v-check">✓</span>';
+      btn2.onclick=function(){
+        st.nc.demonWolfRevive=st.nc.demonWolfRevive===i?-1:i;sfx('wolf');
+        wrap2.querySelectorAll('.victim-btn').forEach(function(b){b.className='victim-btn';});
+        if(st.nc.demonWolfRevive===i)btn2.classList.add('sel-red');
+        showToast(st.nc.demonWolfRevive===i?'😈 Sẽ hồi sinh '+p.name+' vào sáng mai!':'Huỷ hồi sinh');
+        logNReplace('😈 Ác Quỷ','😈 Ác Quỷ sẽ hồi sinh '+p.name);
+      };
+      wrap2.appendChild(btn2);
+    });
+    var nb2=document.createElement('button');nb2.className='victim-btn'+(st.nc.demonWolfRevive===-99?' sel-acc':'');
+    nb2.innerHTML='<span class="v-emoji">—</span><span class="v-name">Không hồi sinh đêm nay</span><span class="v-check">✓</span>';
+    nb2.onclick=function(){st.nc.demonWolfRevive=-99;sfx('click');wrap2.querySelectorAll('.victim-btn').forEach(function(b){b.className='victim-btn';});nb2.className='victim-btn sel-acc';};
+    wrap2.appendChild(nb2);
+    area2.appendChild(wrap2);
+  }
+  else if(s.step==='pi') {
+    var piAlive=st.players.some(function(p){return p.role==='pi'&&p.alive;});
+    if(!piAlive){showDeadRoleNotice('🔍','Thám Tử Tư đã chết — bỏ qua.');return;}
+    if(roleSeduced('pi')){showDeadRoleNotice('🔍','💋 Thám Tử Tư bị cám dỗ — mất khả năng đêm nay!');return;}
+    buildPicker({label:'🔍 Thám Tử Tư chọn người điều tra:', players:alive, selKey:'piCheck', selClass:'sel-acc', sfx:'select',
+      onSelect:function(i,p){
+        var r2=ri(p.role);
+        var isW=WOLF_ROLES.includes(p.role);
+        showToast('🔍 '+p.name+': '+r2.emoji+' '+r2.name+' ('+(isW?'🐺 Phe Sói':'👥 Phe Dân')+')',4000);
+        sfx(isW?'wolf':'confirm');
+        logNReplace('🔍 Thám Tử Tư','🔍 Thám Tử Tư điều tra '+p.name+' → '+r2.name);
+      }
+    });
+  }
+  else if(s.step==='witness') {
+    var witAlive=st.players.some(function(p){return p.role==='witness'&&p.alive;});
+    if(!witAlive){showDeadRoleNotice('👁️','Người Chứng Kiến đã chết — bỏ qua.');return;}
+    var wv=st.nc.wolfVictim;
+    var wMsg=wv>=0&&wv!==-99&&st.players[wv]
+      ?'👁️ Ma Sói đêm nay nhắm tới: '+st.players[wv].name
+      :'👁️ Ma Sói bỏ qua đêm nay (không nhắm ai)';
+    showDeadRoleNotice('👁️',wMsg.replace('👁️ ',''));
+    if(wv>=0&&wv!==-99)sfx('select');
+    logNReplace('👁️ Người Chứng Kiến','👁️ Chứng Kiến: Sói nhắm '+(wv>=0&&wv!==-99&&st.players[wv]?st.players[wv].name:'(không ai)'));
+  }
+  else if(s.step==='exorcist') {
+    var excAlive=st.players.some(function(p){return p.role==='exorcist'&&p.alive;});
+    if(!excAlive){showDeadRoleNotice('☯️','Thầy Trừ Tà đã chết — bỏ qua.');st.nc.exorcistBlock=-99;return;}
+    if(roleSeduced('exorcist')){showDeadRoleNotice('☯️','💋 Thầy Trừ Tà bị cám dỗ — mất khả năng đêm nay!');st.nc.exorcistBlock=-99;return;}
+    buildPicker({label:'☯️ Thầy Trừ Tà chọn người bảo vệ khỏi Ma Sói đêm nay:', players:alive, selKey:'exorcistBlock', selClass:'sel-teal', sfx:'protect',
+      onSelect:function(i,p){showToast('☯️ Bảo vệ '+p.name+' khỏi đòn tấn công của Ma Sói');logNReplace('☯️ Thầy Trừ Tà','☯️ Thầy Trừ Tà bảo vệ '+p.name);}
+    });
+  }
+  else if(s.step==='oracle') {
+    var orAlive=st.players.some(function(p){return p.role==='oracle'&&p.alive;});
+    if(!orAlive){showDeadRoleNotice('🔮🌙','Bói Toán đã chết — bỏ qua.');return;}
+    var deadAll=st.players.map(function(p,i){return Object.assign({},p,{_idx:i});}).filter(function(p){return !p.alive;});
+    if(!deadAll.length){showDeadRoleNotice('🔮🌙','Chưa có hồn ma nào để bói toán.');return;}
+    var oArea=document.getElementById('night-picker-area');oArea.innerHTML='';
+    var oWrap=document.createElement('div');oWrap.className='picker-section';
+    var oLbl=document.createElement('div');oLbl.className='picker-label';oLbl.textContent='🔮🌙 Bói Toán chọn 1 hồn ma để đọc vai:';oWrap.appendChild(oLbl);
+    deadAll.forEach(function(p){
+      var i=p._idx;
+      var oBtn=document.createElement('button');oBtn.className='victim-btn'+(st.nc.oracleCheck===i?' sel-acc':'');
+      oBtn.innerHTML='<span class="v-emoji">'+ri(p.role).emoji+'</span><span class="v-name">'+p.name+' ✝</span><span class="v-check">✓</span>';
+      oBtn.onclick=function(){
+        st.nc.oracleCheck=i;sfx('select');
+        var r2=ri(p.role);
+        showToast('🔮 '+p.name+' (hồn ma): '+r2.emoji+' '+r2.name,3500);sfx('reveal');
+        logNReplace('🔮🌙 Bói Toán','🔮🌙 Bói Toán: '+p.name+' → '+r2.name);
+        oWrap.querySelectorAll('.victim-btn').forEach(function(b){b.className='victim-btn';});
+        oBtn.classList.add('sel-acc');
+      };
+      oWrap.appendChild(oBtn);
+    });
+    oArea.appendChild(oWrap);
   }
 }
 
@@ -459,6 +604,14 @@ export function nightSkip() {
   else if(s.step==='detective') st.nc.detectiveCheck=[];
   else if(s.step==='fox') st.nc.foxCheck=[];
   else if(s.step==='whiteWitch') st.nc.whiteWitchRevive=-99;
+  else if(s.step==='seducer') st.nc.seducedIdx=-99;
+  else if(s.step==='wolfGuard') st.nc.wolfGuardProtect=-99;
+  else if(s.step==='wolfSpy') st.nc.wolfSpyCheck=-99;
+  else if(s.step==='demonWolf') st.nc.demonWolfRevive=-99;
+  else if(s.step==='pi') st.nc.piCheck=-99;
+  else if(s.step==='witness') { /* passive, nothing to set */ }
+  else if(s.step==='exorcist') st.nc.exorcistBlock=-99;
+  else if(s.step==='oracle') st.nc.oracleCheck=-99;
   // matchmaker: bỏ qua đêm này nhưng chưa dùng — có thể dùng đêm sau
   showToast('⏭ Bỏ qua: '+s.name);
   if(st.nightStep>=st.nightOrder.length-1){sfx('confirm');_startDay();}

@@ -23,7 +23,16 @@ export function freshNc(prev) {
     sorcererCheck: -1,
     foxCheck: [],
     whiteWitchUsed: prev.whiteWitchUsed || false,
-    whiteWitchRevive: -1
+    whiteWitchRevive: -1,
+    seducedIdx: -1,
+    wolfGuardProtect: -1,
+    wolfSpyCheck: -1,
+    demonWolfRevive: -1,
+    demonWolfUsed: prev.demonWolfUsed || false,
+    piCheck: -1,
+    exorcistBlock: -1,
+    exorcistUsed: prev.exorcistUsed || false,
+    oracleCheck: -1
   };
 }
 

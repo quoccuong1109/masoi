@@ -1,7 +1,7 @@
-import { ROLES, WOLF_ROLES, VIL_ROLES, SKIPPABLE } from './data.js?v=5';
-import { sfx, startNightBgm, stopBgm, narrate } from './audio.js?v=5';
-import { st, freshNc } from './state.js?v=5';
-import { goScreen, showToast, ri } from './ui.js?v=5';
+import { ROLES, WOLF_ROLES, VIL_ROLES, SKIPPABLE } from './data.js?v=6';
+import { sfx, startNightBgm, stopBgm, narrate } from './audio.js?v=6';
+import { st, freshNc } from './state.js?v=6';
+import { goScreen, showToast, ri } from './ui.js?v=6';
 
 var NARRATE_MAP = {
   'sleep':       'Màn đêm buông xuống. Tất cả nhắm mắt, cúi đầu, giữ im lặng tuyệt đối.',
@@ -69,7 +69,7 @@ export function buildNightOrder() {
   if((r.medium||0)>0&&st.players.some(function(p){return !p.alive;})) ord.push({icon:'👻',name:'Đồng Cốt thức dậy',action:'Đồng Cốt mở mắt, chỉ 1 hồn ma. Quản trò gật/lắc 1 câu hỏi có/không. Nhắm mắt lại.',step:'medium'});
   if(!st.foxAbilityLost&&(r.fox||0)>0) ord.push({icon:'🦊',name:'Cáo thức dậy',action:'Cáo mở mắt. Chọn 3 người để điều tra — Quản trò báo có Ma Sói trong nhóm đó không. Nhắm mắt lại.',step:'fox'});
   if(!st.nc.whiteWitchUsed&&(r.whiteWitch||0)>0&&st.players.some(function(p){return !p.alive;})) ord.push({icon:'🌟',name:'Phù Thủy Trắng thức dậy',action:'Phù Thủy Trắng mở mắt. Chọn 1 người đã chết để hồi sinh (hoặc bỏ qua). Nhắm mắt lại.',step:'whiteWitch'});
-  if((r.oracle||0)>0&&st.players.some(function(p){return !p.alive;})) ord.push({icon:'🔮🌙',name:'Bói Toán thức dậy',action:'Bói Toán mở mắt. Chọn 1 hồn ma — Quản trò tiết lộ vai trò chính xác. Nhắm mắt lại.',step:'oracle'});
+  if((r.oracle||0)>0&&st.players.some(function(p){return !p.alive;})) ord.push({icon:'🌙',name:'Bói Toán thức dậy',action:'Bói Toán mở mắt. Chọn 1 hồn ma — Quản trò tiết lộ vai trò chính xác. Nhắm mắt lại.',step:'oracle'});
   ord.push({icon:'🌅',name:'Tất cả thức dậy!',action:'Chào buổi sáng! Kết quả đêm qua được công bố.',step:'wake'});
   return ord;
 }
@@ -544,12 +544,12 @@ export function updateNight() {
   }
   else if(s.step==='oracle') {
     var orAlive=st.players.some(function(p){return p.role==='oracle'&&p.alive;});
-    if(!orAlive){showDeadRoleNotice('🔮🌙','Bói Toán đã chết — bỏ qua.');return;}
+    if(!orAlive){showDeadRoleNotice('🌙','Bói Toán đã chết — bỏ qua.');return;}
     var deadAll=st.players.map(function(p,i){return Object.assign({},p,{_idx:i});}).filter(function(p){return !p.alive;});
-    if(!deadAll.length){showDeadRoleNotice('🔮🌙','Chưa có hồn ma nào để bói toán.');return;}
+    if(!deadAll.length){showDeadRoleNotice('🌙','Chưa có hồn ma nào để bói toán.');return;}
     var oArea=document.getElementById('night-picker-area');oArea.innerHTML='';
     var oWrap=document.createElement('div');oWrap.className='picker-section';
-    var oLbl=document.createElement('div');oLbl.className='picker-label';oLbl.textContent='🔮🌙 Bói Toán chọn 1 hồn ma để đọc vai:';oWrap.appendChild(oLbl);
+    var oLbl=document.createElement('div');oLbl.className='picker-label';oLbl.textContent='🌙 Bói Toán chọn 1 hồn ma để đọc vai:';oWrap.appendChild(oLbl);
     deadAll.forEach(function(p){
       var i=p._idx;
       var oBtn=document.createElement('button');oBtn.className='victim-btn'+(st.nc.oracleCheck===i?' sel-acc':'');
@@ -558,7 +558,7 @@ export function updateNight() {
         st.nc.oracleCheck=i;sfx('select');
         var r2=ri(p.role);
         showToast('🔮 '+p.name+' (hồn ma): '+r2.emoji+' '+r2.name,3500);sfx('reveal');
-        logNReplace('🔮🌙 Bói Toán','🔮🌙 Bói Toán: '+p.name+' → '+r2.name);
+        logNReplace('🌙 Bói Toán','🌙 Bói Toán: '+p.name+' → '+r2.name);
         oWrap.querySelectorAll('.victim-btn').forEach(function(b){b.className='victim-btn';});
         oBtn.classList.add('sel-acc');
       };

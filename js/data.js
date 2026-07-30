@@ -29,7 +29,7 @@ export var ROLES = {
   witness:    {name:'Người Chứng Kiến',  emoji:'👁️', team:'village', desc:'Mỗi đêm biết Ma Sói đêm nay nhắm tới AI trước khi công bố sáng hôm sau. Quản trò báo riêng bí mật.',                          tip:'Thông tin này giúp xác nhận ai bị tấn công thật và ai đang được bảo vệ.'},
   scapegoat:  {name:'Vật Tế Thần',       emoji:'🐑', team:'village', desc:'Nếu bỏ phiếu ban ngày HÒA PHIẾU, Vật Tế Thần tự động bị hành quyết thay! (Không cần nhiều phiếu nhất.)',                        tip:'Đừng để lộ vai — kẻ xấu sẽ cố tình tạo hòa phiếu để loại bạn.'},
   exorcist:   {name:'Thầy Trừ Tà',       emoji:'☯️', team:'village', desc:'Một lần duy nhất: chọn trước 1 người để bảo vệ đêm nay — nếu Ma Sói nhắm vào người đó, đòn tấn công bị chặn hoàn toàn!',      tip:'Dùng khi Tiên Tri vừa tiết lộ thông tin quan trọng — bảo vệ họ tối đó.'},
-  oracle:     {name:'Bói Toán',           emoji:'🔮🌙',team:'village',desc:'Mỗi đêm chọn 1 người đã chết — Quản trò tiết lộ CHÍNH XÁC vai trò của họ! Dùng để xác nhận thông tin Lịch Sử.',               tip:'Ưu tiên kiểm tra người chết đáng ngờ để xác minh họ thật sự là dân hay sói.'},
+  oracle:     {name:'Bói Toán',           emoji:'🌙', team:'village',desc:'Mỗi đêm chọn 1 người đã chết — Quản trò tiết lộ CHÍNH XÁC vai trò của họ! Dùng để xác nhận thông tin Lịch Sử.',               tip:'Ưu tiên kiểm tra người chết đáng ngờ để xác minh họ thật sự là dân hay sói.'},
   villager:   {name:'Dân Làng',          emoji:'🧑‍🌾',team:'village', desc:'Không có quyền năng đặc biệt. Quan sát, thảo luận và bỏ phiếu sáng suốt!',                                                    tip:'Chú ý người im lặng bất thường VÀ người nói quá nhiều.'},
 };
 

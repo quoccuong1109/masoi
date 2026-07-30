@@ -1,7 +1,7 @@
-import { WOLF_ROLES } from './data.js?v=5';
-import { sfx, stopBgm } from './audio.js?v=5';
-import { st } from './state.js?v=5';
-import { goScreen, showToast, ri } from './ui.js?v=5';
+import { WOLF_ROLES } from './data.js?v=6';
+import { sfx, stopBgm } from './audio.js?v=6';
+import { st } from './state.js?v=6';
+import { goScreen, showToast, ri } from './ui.js?v=6';
 
 function processDeath() {
   if(st.hunterQueue.length) { processHunterQueue(); return; }

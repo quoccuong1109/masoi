@@ -1,7 +1,7 @@
-import { ROLES, WOLF_ROLES, VIL_ROLES, POWER, calcBalance } from './data.js?v=5';
-import { sfx } from './audio.js?v=5';
-import { st, freshNc } from './state.js?v=5';
-import { goScreen, showToast, ri } from './ui.js?v=5';
+import { ROLES, WOLF_ROLES, VIL_ROLES, POWER, calcBalance } from './data.js?v=6';
+import { sfx } from './audio.js?v=6';
+import { st, freshNc } from './state.js?v=6';
+import { goScreen, showToast, ri } from './ui.js?v=6';
 
 function shuffle(a) { for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;} }
 

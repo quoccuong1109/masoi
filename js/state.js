@@ -2,6 +2,7 @@ export function freshNc(prev) {
   prev = prev || {};
   return {
     wolfVictim: -1,
+    wolfVictim2: -1,
     whitewolfVictim: -1,
     guardProtect: -1,
     guardLastNight: (typeof prev.guardLastNight === 'number') ? prev.guardLastNight : -1,
@@ -14,11 +15,15 @@ export function freshNc(prev) {
     cupidPair: [],
     loverPair: prev.loverPair || [],
     gangleaderCheck: -1,
-    doctorProtect: -1,
     detectiveCheck: [],
     matchmakerUsed: prev.matchmakerUsed || false,
     matchmakerPair: prev.matchmakerPair || [],
-    matchmakerNightPair: []
+    matchmakerNightPair: [],
+    wildchildNightPick: -1,
+    sorcererCheck: -1,
+    foxCheck: [],
+    whiteWitchUsed: prev.whiteWitchUsed || false,
+    whiteWitchRevive: -1
   };
 }
 
@@ -46,5 +51,8 @@ export var st = {
   hunterQueue: [],
   sheriffIdx: -1,
   sheriffPassQueue: [],
-  gameOver: false
+  gameOver: false,
+  wolfDoubleKill: false,
+  wildchildRoleModel: -1,
+  foxAbilityLost: false
 };

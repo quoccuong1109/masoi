@@ -1,6 +1,6 @@
-import { st } from './state.js';
-import { ROLES } from './data.js';
-import { sfx } from './audio.js?v=2';
+import { st } from './state.js?v=3';
+import { ROLES } from './data.js?v=3';
+import { sfx } from './audio.js?v=3';
 
 var _onFnavShow = null;
 export function setFnavCallback(fn) { _onFnavShow = fn; }

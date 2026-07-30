@@ -1,7 +1,7 @@
-import { ROLES, WOLF_ROLES, VIL_ROLES, POWER, calcBalance } from './data.js';
-import { sfx } from './audio.js?v=2';
-import { st, freshNc } from './state.js';
-import { goScreen, showToast, ri } from './ui.js?v=2';
+import { ROLES, WOLF_ROLES, VIL_ROLES, POWER, calcBalance } from './data.js?v=3';
+import { sfx } from './audio.js?v=3';
+import { st, freshNc } from './state.js?v=3';
+import { goScreen, showToast, ri } from './ui.js?v=3';
 
 function shuffle(a) { for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;} }
 
@@ -13,10 +13,13 @@ export function suggestRoles(n) {
   if(n>=8){cfg.alphawolf=1;cfg.wolf=Math.max(0,wolves-1);}
   if(n>=13)cfg.cub=1; if(n>=22)cfg.whitewolf=1; if(n>=16)cfg.humanwolf=1;
   if(n>=20){cfg.gangleader=1;cfg.wolf=Math.max(0,cfg.wolf-1);}
+  if(n>=18)cfg.sorcerer=1;
   if(n>=5)cfg.seer=1; if(n>=10)cfg.hunter=1; if(n>=10)cfg.witch=1;
   if(n>=14)cfg.cupid=1; if(n>=16)cfg.guard=1;
+  if(n>=8)cfg.elder=1; if(n>=12)cfg.wildchild=1;
   if(n>=18){cfg.sheriff=1;cfg.fool=1;} if(n>=20)cfg.medium=1; if(n>=24)cfg.priest=1;
-  if(n>=12)cfg.doctor=1; if(n>=15)cfg.detective=1; if(n>=14)cfg.matchmaker=1;
+  if(n>=15)cfg.detective=1; if(n>=14)cfg.matchmaker=1;
+  if(n>=14)cfg.fox=1; if(n>=16)cfg.whiteWitch=1;
   var sp = WOLF_ROLES.concat(VIL_ROLES).reduce(function(a,k){return a+(cfg[k]||0);},0);
   cfg.villager = Math.max(2, n-sp);
   return cfg;

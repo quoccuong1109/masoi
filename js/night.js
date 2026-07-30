@@ -1,7 +1,7 @@
-import { ROLES, WOLF_ROLES, VIL_ROLES, SKIPPABLE } from './data.js?v=4';
-import { sfx, startNightBgm, stopBgm, narrate } from './audio.js?v=4';
-import { st, freshNc } from './state.js?v=4';
-import { goScreen, showToast, ri } from './ui.js?v=4';
+import { ROLES, WOLF_ROLES, VIL_ROLES, SKIPPABLE } from './data.js?v=5';
+import { sfx, startNightBgm, stopBgm, narrate } from './audio.js?v=5';
+import { st, freshNc } from './state.js?v=5';
+import { goScreen, showToast, ri } from './ui.js?v=5';
 
 var NARRATE_MAP = {
   'sleep':       'Màn đêm buông xuống. Tất cả nhắm mắt, cúi đầu, giữ im lặng tuyệt đối.',
@@ -25,7 +25,6 @@ var NARRATE_MAP = {
   'wildchild':   'Trẻ Em Hoang Dã, hãy mở mắt và chọn hình mẫu của mình.',
   'fox':         'Cáo, hãy mở mắt và chọn ba người để điều tra.',
   'whiteWitch':  'Phù Thủy Trắng, hãy mở mắt.',
-  'pi':          'Thám Tử Tư, hãy mở mắt và chọn người điều tra.',
   'witness':     'Quản trò báo bí mật cho Người Chứng Kiến.',
   'exorcist':    'Thầy Trừ Tà, hãy mở mắt và chọn người cần bảo vệ đêm nay.',
   'oracle':      'Bói Toán, hãy mở mắt và chọn hồn ma để đọc vai.',
@@ -64,7 +63,6 @@ export function buildNightOrder() {
   if((r.sorcerer||0)>0) ord.push({icon:'🧿',name:'Pháp Sư [Sói] điều tra',action:'Pháp Sư (phe Sói) mở mắt. Chọn 1 người — Quản trò gật nếu đó là Tiên Tri, lắc nếu không phải. Nhắm mắt lại.',step:'sorcerer'});
   if((r.seer||0)>0) ord.push({icon:'🔮',name:'Tiên Tri thức dậy',action:'Tiên Tri chọn 1 người để điều tra. Quản trò gật (Ma Sói — trừ Người Sói) hoặc lắc (Dân). Nhắm mắt lại.',step:'seer'});
   if((r.detective||0)>0) ord.push({icon:'🕵️',name:'Thám Tử thức dậy',action:'Thám Tử mở mắt. Chọn 2 người — Quản trò báo CÓ hay KHÔNG có ít nhất 1 Ma Sói trong 2 người đó. Nhắm mắt lại.',step:'detective'});
-  if((r.pi||0)>0) ord.push({icon:'🔍',name:'Thám Tử Tư thức dậy',action:'Thám Tử Tư mở mắt. Chọn 1 người — Quản trò tiết lộ vai trò chính xác. Nhắm mắt lại.',step:'pi'});
   if((r.guard||0)>0) ord.push({icon:'🛡️',name:'Bảo Vệ thức dậy',action:'Bảo Vệ chọn 1 người bảo vệ đêm nay (không trùng đêm trước). Hoặc bỏ qua.',step:'guard'});
   if(!st.nc.exorcistUsed&&(r.exorcist||0)>0) ord.push({icon:'☯️',name:'Thầy Trừ Tà thức dậy',action:'Thầy Trừ Tà mở mắt. Một lần duy nhất: chọn 1 người để bảo vệ khỏi tấn công của Ma Sói đêm nay. Nhắm mắt lại.',step:'exorcist'});
   if((r.witch||0)>0) ord.push({icon:'🧙',name:'Phù Thủy thức dậy',action:'Phù Thủy mở mắt. Xem nạn nhân và quyết định dùng thuốc.',step:'witch'});
@@ -525,20 +523,6 @@ export function updateNight() {
     wrap2.appendChild(nb2);
     area2.appendChild(wrap2);
   }
-  else if(s.step==='pi') {
-    var piAlive=st.players.some(function(p){return p.role==='pi'&&p.alive;});
-    if(!piAlive){showDeadRoleNotice('🔍','Thám Tử Tư đã chết — bỏ qua.');return;}
-    if(roleSeduced('pi')){showDeadRoleNotice('🔍','💋 Thám Tử Tư bị cám dỗ — mất khả năng đêm nay!');return;}
-    buildPicker({label:'🔍 Thám Tử Tư chọn người điều tra:', players:alive, selKey:'piCheck', selClass:'sel-acc', sfx:'select',
-      onSelect:function(i,p){
-        var r2=ri(p.role);
-        var isW=WOLF_ROLES.includes(p.role);
-        showToast('🔍 '+p.name+': '+r2.emoji+' '+r2.name+' ('+(isW?'🐺 Phe Sói':'👥 Phe Dân')+')',4000);
-        sfx(isW?'wolf':'confirm');
-        logNReplace('🔍 Thám Tử Tư','🔍 Thám Tử Tư điều tra '+p.name+' → '+r2.name);
-      }
-    });
-  }
   else if(s.step==='witness') {
     var witAlive=st.players.some(function(p){return p.role==='witness'&&p.alive;});
     if(!witAlive){showDeadRoleNotice('👁️','Người Chứng Kiến đã chết — bỏ qua.');return;}
@@ -608,7 +592,6 @@ export function nightSkip() {
   else if(s.step==='wolfGuard') st.nc.wolfGuardProtect=-99;
   else if(s.step==='wolfSpy') st.nc.wolfSpyCheck=-99;
   else if(s.step==='demonWolf') st.nc.demonWolfRevive=-99;
-  else if(s.step==='pi') st.nc.piCheck=-99;
   else if(s.step==='witness') { /* passive, nothing to set */ }
   else if(s.step==='exorcist') st.nc.exorcistBlock=-99;
   else if(s.step==='oracle') st.nc.oracleCheck=-99;

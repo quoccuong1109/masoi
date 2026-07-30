@@ -1,7 +1,7 @@
-import { ROLES, WOLF_ROLES, VIL_ROLES, POWER, calcBalance } from './data.js?v=4';
-import { sfx } from './audio.js?v=4';
-import { st, freshNc } from './state.js?v=4';
-import { goScreen, showToast, ri } from './ui.js?v=4';
+import { ROLES, WOLF_ROLES, VIL_ROLES, POWER, calcBalance } from './data.js?v=5';
+import { sfx } from './audio.js?v=5';
+import { st, freshNc } from './state.js?v=5';
+import { goScreen, showToast, ri } from './ui.js?v=5';
 
 function shuffle(a) { for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;} }
 
@@ -23,7 +23,6 @@ export function suggestRoles(n) {
   if(n>=18){cfg.sheriff=1;cfg.fool=1;} if(n>=20)cfg.medium=1; if(n>=24)cfg.priest=1;
   if(n>=15)cfg.detective=1; if(n>=14)cfg.matchmaker=1;
   if(n>=14)cfg.fox=1; if(n>=16)cfg.whiteWitch=1;
-  if(n>=18)cfg.pi=1;
   if(n>=20)cfg.witness=1;
   if(n>=22)cfg.exorcist=1;
   if(n>=24)cfg.oracle=1;

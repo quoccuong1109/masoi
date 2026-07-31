@@ -1,6 +1,12 @@
 import { ROLES, WOLF_ROLES, VIL_ROLES, SKIPPABLE } from './data.js?v=6';
 import { sfx, startNightBgm, stopBgm, narrate } from './audio.js?v=6';
 import { st, freshNc } from './state.js?v=6';
+
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, function(c) {
+    return {'&':'&','<':'<','>':'>','"':'"',"'":'''}[c];
+  });
+}
 import { goScreen, showToast, ri } from './ui.js?v=6';
 
 var NARRATE_MAP = {
@@ -105,7 +111,7 @@ export function buildPicker(cfg) {
     var i=p._idx;
     var btn=document.createElement('button');
     btn.className='victim-btn'+(st.nc[cfg.selKey]===i?' '+cfg.selClass:'');
-    btn.innerHTML='<span class="v-emoji">'+ri(p.role).emoji+'</span><span class="v-name">'+p.name+'</span><span class="v-check">✓</span>';
+    btn.innerHTML='<span class="v-emoji">'+ri(p.role).emoji+'</span><span class="v-name">'+esc(p.name)+'</span><span class="v-check">✓</span>';
     btn.onclick=function(){
       st.nc[cfg.selKey]=i; sfx(cfg.sfx||'select');
       wrap.querySelectorAll('.victim-btn:not([data-dead])').forEach(function(b){b.className='victim-btn';});
@@ -120,7 +126,7 @@ export function buildPicker(cfg) {
     dead.forEach(function(p){
       var btn=document.createElement('button');btn.className='victim-btn';btn.disabled=true;btn.setAttribute('data-dead','1');
       btn.style.cssText='opacity:.22;cursor:not-allowed;filter:grayscale(1);margin-bottom:.25rem;';
-      btn.innerHTML='<span class="v-emoji">'+ri(p.role).emoji+'</span><span class="v-name">'+p.name+' ✝</span>';
+      btn.innerHTML='<span class="v-emoji">'+ri(p.role).emoji+'</span><span class="v-name">'+esc(p.name)+' ✝</span>';
       wrap.appendChild(btn);
     });
   }
@@ -135,7 +141,7 @@ export function buildDetectivePicker(alive) {
   alive.forEach(function(p){
     var i=p._idx, sel=st.nc.detectiveCheck.includes(i);
     var btn=document.createElement('button');btn.className='victim-btn'+(sel?' sel-acc':'');btn.id='dt-'+i;
-    btn.innerHTML='<span class="v-emoji">'+ri(p.role).emoji+'</span><span class="v-name">'+p.name+'</span><span class="v-check">✓</span>';
+    btn.innerHTML='<span class="v-emoji">'+ri(p.role).emoji+'</span><span class="v-name">'+esc(p.name)+'</span><span class="v-check">✓</span>';
     btn.onclick=function(){
       sfx('select');
       if(st.nc.detectiveCheck.includes(i)) st.nc.detectiveCheck=st.nc.detectiveCheck.filter(function(x){return x!==i;});
@@ -170,7 +176,7 @@ export function buildMatchmakerPicker(alive) {
   alive.forEach(function(p){
     var i=p._idx, sel=st.nc.matchmakerNightPair.includes(i);
     var btn=document.createElement('button');btn.className='victim-btn'+(sel?' sel-acc':'');btn.id='mm-'+i;
-    btn.innerHTML='<span class="v-emoji">'+ri(p.role).emoji+'</span><span class="v-name">'+p.name+'</span><span class="v-check">✓</span>';
+    btn.innerHTML='<span class="v-emoji">'+ri(p.role).emoji+'</span><span class="v-name">'+esc(p.name)+'</span><span class="v-check">✓</span>';
     btn.onclick=function(){
       sfx('select');
       if(st.nc.matchmakerNightPair.includes(i)) st.nc.matchmakerNightPair=st.nc.matchmakerNightPair.filter(function(x){return x!==i;});
@@ -199,7 +205,7 @@ export function buildCupidPicker(alive) {
   alive.forEach(function(p){
     var i=p._idx, sel=st.nc.cupidPair.includes(i);
     var btn=document.createElement('button');btn.className='victim-btn'+(sel?' sel-acc':'');btn.id='cp-'+i;
-    btn.innerHTML='<span class="v-emoji">'+ri(p.role).emoji+'</span><span class="v-name">'+p.name+'</span><span class="v-check">✓</span>';
+    btn.innerHTML='<span class="v-emoji">'+ri(p.role).emoji+'</span><span class="v-name">'+esc(p.name)+'</span><span class="v-check">✓</span>';
     btn.onclick=function(){
       sfx('select');
       if(st.nc.cupidPair.includes(i))st.nc.cupidPair=st.nc.cupidPair.filter(function(x){return x!==i;});
@@ -245,7 +251,7 @@ export function buildWitchPicker(alive) {
     alive.forEach(function(p){
       var i=p._idx;
       var btn=document.createElement('button');btn.className='victim-btn'+(st.nc.witchPoison===i?' sel-red':'');btn.setAttribute('data-pois','1');
-      btn.innerHTML='<span class="v-emoji">☠️</span><span class="v-name">'+p.name+'</span><span class="v-check">✓</span>';
+      btn.innerHTML='<span class="v-emoji">☠️</span><span class="v-name">'+esc(p.name)+'</span><span class="v-check">✓</span>';
       btn.onclick=function(){
         st.nc.witchPoison=st.nc.witchPoison===i?-1:i; sfx('wolf');
         wrap.querySelectorAll('[data-pois]').forEach(function(b){b.classList.remove('sel-red');});
@@ -272,7 +278,7 @@ export function buildFoxPicker(alive) {
   alive.forEach(function(p){
     var i=p._idx, sel=st.nc.foxCheck.includes(i);
     var btn=document.createElement('button');btn.className='victim-btn'+(sel?' sel-acc':'');btn.id='fox-'+i;
-    btn.innerHTML='<span class="v-emoji">'+ri(p.role).emoji+'</span><span class="v-name">'+p.name+'</span><span class="v-check">✓</span>';
+    btn.innerHTML='<span class="v-emoji">'+ri(p.role).emoji+'</span><span class="v-name">'+esc(p.name)+'</span><span class="v-check">✓</span>';
     btn.onclick=function(){
       sfx('select');
       if(st.nc.foxCheck.includes(i))st.nc.foxCheck=st.nc.foxCheck.filter(function(x){return x!==i;});
@@ -311,12 +317,12 @@ export function buildWhiteWitchPicker() {
   dead.forEach(function(p){
     var i=p._idx;
     var btn=document.createElement('button');btn.className='victim-btn'+(st.nc.whiteWitchRevive===i?' sel-teal':'');
-    btn.innerHTML='<span class="v-emoji">'+ri(p.role).emoji+'</span><span class="v-name">'+p.name+' ✝</span><span class="v-check">✓</span>';
+    btn.innerHTML='<span class="v-emoji">'+ri(p.role).emoji+'</span><span class="v-name">'+esc(p.name)+' ✝</span><span class="v-check">✓</span>';
     btn.onclick=function(){
       st.nc.whiteWitchRevive=st.nc.whiteWitchRevive===i?-1:i; sfx('confirm');
       wrap.querySelectorAll('.victim-btn').forEach(function(b){b.classList.remove('sel-teal');});
       if(st.nc.whiteWitchRevive===i)btn.classList.add('sel-teal');
-      showToast(st.nc.whiteWitchRevive===i?'🌟 Sẽ hồi sinh '+p.name+' vào sáng mai!':'Huỷ hồi sinh');
+      showToast(st.nc.whiteWitchRevive===i?'🌟 Sẽ hồi sinh '+esc(p.name)+' vào sáng mai!':'Huỷ hồi sinh');
     };
     wrap.appendChild(btn);
   });
@@ -375,8 +381,8 @@ export function updateNight() {
     buildPicker({label:'🔮 Tiên Tri điều tra 1 người:', players:alive, selKey:'seerCheck', selClass:'sel-acc', sfx:'select',
       onSelect:function(i,p){
         var isWolf = WOLF_ROLES.includes(p.role) && !ROLES[p.role].immuneSeer;
-        showToast(isWolf?'🔴 '+p.name+' là MA SÓI!':'⚪ '+p.name+' là DÂN LÀNG',3500);
-        logNReplace('🔮 Tiên Tri', '🔮 Tiên Tri soi '+p.name+' → '+(isWolf?'MA SÓI':'Dân'));
+        showToast(isWolf?'🔴 '+esc(p.name)+' là MA SÓI!':'⚪ '+esc(p.name)+' là DÂN LÀNG',3500);
+        logNReplace('🔮 Tiên Tri', '🔮 Tiên Tri soi '+esc(p.name)+' → '+(isWolf?'MA SÓI':'Dân'));
       }
     });
   }
@@ -412,8 +418,8 @@ export function updateNight() {
     buildPicker({label:'🤴 Trùm Sói chọn người điều tra:', players:alive, selKey:'gangleaderCheck', selClass:'sel-red', sfx:'select',
       onSelect:function(i,p){
         var isPlain=p.role==='villager';
-        showToast(isPlain?'✅ '+p.name+' là DÂN LÀNG THƯỜNG':'❌ '+p.name+' CÓ VAI ĐẶC BIỆT (không phải dân thường)',4000);
-        logNReplace('🤴 Trùm Sói', '🤴 Trùm Sói kiểm tra '+p.name+' → '+(isPlain?'Dân thường':'Vai đặc biệt'));
+        showToast(isPlain?'✅ '+esc(p.name)+' là DÂN LÀNG THƯỜNG':'❌ '+esc(p.name)+' CÓ VAI ĐẶC BIỆT (không phải dân thường)',4000);
+        logNReplace('🤴 Trùm Sói', '🤴 Trùm Sói kiểm tra '+esc(p.name)+' → '+(isPlain?'Dân thường':'Vai đặc biệt'));
       }
     });
   }
@@ -424,9 +430,9 @@ export function updateNight() {
     buildPicker({label:'🧿 Pháp Sư chọn người điều tra:', players:alive, selKey:'sorcererCheck', selClass:'sel-red', sfx:'select',
       onSelect:function(i,p){
         var isSeer=p.role==='seer';
-        showToast(isSeer?'✅ '+p.name+' ĐÚNG LÀ TIÊN TRI!':'❌ '+p.name+' không phải Tiên Tri',3500);
+        showToast(isSeer?'✅ '+esc(p.name)+' ĐÚNG LÀ TIÊN TRI!':'❌ '+esc(p.name)+' không phải Tiên Tri',3500);
         sfx(isSeer?'wolf':'click');
-        logNReplace('🧿 Pháp Sư','🧿 Pháp Sư kiểm tra '+p.name+' → '+(isSeer?'là Tiên Tri!':'không phải Tiên Tri'));
+        logNReplace('🧿 Pháp Sư','🧿 Pháp Sư kiểm tra '+esc(p.name)+' → '+(isSeer?'là Tiên Tri!':'không phải Tiên Tri'));
       }
     });
   }
@@ -442,7 +448,7 @@ export function updateNight() {
     buildPicker({label:'🧒 Trẻ Em Hoang Dã chọn hình mẫu (đêm đầu):', players:alive, selKey:'wildchildNightPick', selClass:'sel-acc', sfx:'select',
       onSelect:function(i,p){
         st.wildchildRoleModel = i;
-        showToast('🧒 Hình mẫu: '+p.name+' — nếu họ chết, Trẻ Em đổi phe!');
+        showToast('🧒 Hình mẫu: '+esc(p.name)+' — nếu họ chết, Trẻ Em đổi phe!');
         logN('🧒 Trẻ Em Hoang Dã chọn hình mẫu: '+p.name);
       }
     });
@@ -470,7 +476,7 @@ export function updateNight() {
     var sedAlive=st.players.some(function(p){return p.role==='seducer'&&p.alive;});
     if(!sedAlive){showDeadRoleNotice('💋','Kẻ Cám Dỗ đã chết — bỏ qua.');st.nc.seducedIdx=-99;return;}
     buildPicker({label:'💋 Kẻ Cám Dỗ chọn người bị mê hoặc đêm nay:', players:alive, selKey:'seducedIdx', selClass:'sel-red', sfx:'wolf',
-      onSelect:function(i,p){showToast('💋 Đêm nay '+p.name+' bị cám dỗ — mất khả năng!');logNReplace('💋 Kẻ Cám Dỗ','💋 Kẻ Cám Dỗ mê hoặc '+p.name);}
+      onSelect:function(i,p){showToast('💋 Đêm nay '+esc(p.name)+' bị cám dỗ — mất khả năng!');logNReplace('💋 Kẻ Cám Dỗ','💋 Kẻ Cám Dỗ mê hoặc '+p.name);}
     });
   }
   else if(s.step==='wolfGuard') {
@@ -480,7 +486,7 @@ export function updateNight() {
     var aliveWolves=st.players.map(function(p,i){return Object.assign({},p,{_idx:i});}).filter(function(p){return p.alive&&WOLF_ROLES.includes(p.role);});
     if(!aliveWolves.length){showDeadRoleNotice('🛡️🐺','Không còn Ma Sói nào để bảo vệ.');st.nc.wolfGuardProtect=-99;return;}
     buildPicker({label:'🛡️🐺 Sói Bảo Vệ chọn đồng đội cần bảo vệ:', players:aliveWolves, selKey:'wolfGuardProtect', selClass:'sel-red', sfx:'protect',
-      onSelect:function(i,p){showToast('🛡️🐺 Bảo vệ '+p.name+' tối nay');logNReplace('🛡️🐺 Sói Bảo Vệ','🛡️🐺 Sói Bảo Vệ chọn bảo vệ '+p.name);}
+      onSelect:function(i,p){showToast('🛡️🐺 Bảo vệ '+esc(p.name)+' tối nay');logNReplace('🛡️🐺 Sói Bảo Vệ','🛡️🐺 Sói Bảo Vệ chọn bảo vệ '+p.name);}
     });
   }
   else if(s.step==='wolfSpy') {
@@ -490,8 +496,8 @@ export function updateNight() {
     buildPicker({label:'🔎 Thám Tử Sói chọn người điều tra:', players:alive, selKey:'wolfSpyCheck', selClass:'sel-red', sfx:'select',
       onSelect:function(i,p){
         var r2=ri(p.role);
-        showToast('🔎 '+p.name+': '+r2.emoji+' '+r2.name,3500);sfx('select');
-        logNReplace('🔎 Thám Tử Sói','🔎 Thám Tử Sói điều tra '+p.name+' → '+r2.name);
+        showToast('🔎 '+esc(p.name)+': '+r2.emoji+' '+r2.name,3500);sfx('select');
+        logNReplace('🔎 Thám Tử Sói','🔎 Thám Tử Sói điều tra '+esc(p.name)+' → '+r2.name);
       }
     });
   }
@@ -507,12 +513,12 @@ export function updateNight() {
     deadWolves.forEach(function(p){
       var i=p._idx;
       var btn2=document.createElement('button');btn2.className='victim-btn'+(st.nc.demonWolfRevive===i?' sel-red':'');
-      btn2.innerHTML='<span class="v-emoji">'+ri(p.role).emoji+'</span><span class="v-name">'+p.name+' ✝</span><span class="v-check">✓</span>';
+      btn2.innerHTML='<span class="v-emoji">'+ri(p.role).emoji+'</span><span class="v-name">'+esc(p.name)+' ✝</span><span class="v-check">✓</span>';
       btn2.onclick=function(){
         st.nc.demonWolfRevive=st.nc.demonWolfRevive===i?-1:i;sfx('wolf');
         wrap2.querySelectorAll('.victim-btn').forEach(function(b){b.className='victim-btn';});
         if(st.nc.demonWolfRevive===i)btn2.classList.add('sel-red');
-        showToast(st.nc.demonWolfRevive===i?'😈 Sẽ hồi sinh '+p.name+' vào sáng mai!':'Huỷ hồi sinh');
+        showToast(st.nc.demonWolfRevive===i?'😈 Sẽ hồi sinh '+esc(p.name)+' vào sáng mai!':'Huỷ hồi sinh');
         logNReplace('😈 Ác Quỷ','😈 Ác Quỷ sẽ hồi sinh '+p.name);
       };
       wrap2.appendChild(btn2);
@@ -539,7 +545,7 @@ export function updateNight() {
     if(!excAlive){showDeadRoleNotice('☯️','Thầy Trừ Tà đã chết — bỏ qua.');st.nc.exorcistBlock=-99;return;}
     if(roleSeduced('exorcist')){showDeadRoleNotice('☯️','💋 Thầy Trừ Tà bị cám dỗ — mất khả năng đêm nay!');st.nc.exorcistBlock=-99;return;}
     buildPicker({label:'☯️ Thầy Trừ Tà chọn người bảo vệ khỏi Ma Sói đêm nay:', players:alive, selKey:'exorcistBlock', selClass:'sel-teal', sfx:'protect',
-      onSelect:function(i,p){showToast('☯️ Bảo vệ '+p.name+' khỏi đòn tấn công của Ma Sói');logNReplace('☯️ Thầy Trừ Tà','☯️ Thầy Trừ Tà bảo vệ '+p.name);}
+      onSelect:function(i,p){showToast('☯️ Bảo vệ '+esc(p.name)+' khỏi đòn tấn công của Ma Sói');logNReplace('☯️ Thầy Trừ Tà','☯️ Thầy Trừ Tà bảo vệ '+p.name);}
     });
   }
   else if(s.step==='oracle') {
@@ -553,12 +559,12 @@ export function updateNight() {
     deadAll.forEach(function(p){
       var i=p._idx;
       var oBtn=document.createElement('button');oBtn.className='victim-btn'+(st.nc.oracleCheck===i?' sel-acc':'');
-      oBtn.innerHTML='<span class="v-emoji">'+ri(p.role).emoji+'</span><span class="v-name">'+p.name+' ✝</span><span class="v-check">✓</span>';
+      oBtn.innerHTML='<span class="v-emoji">'+ri(p.role).emoji+'</span><span class="v-name">'+esc(p.name)+' ✝</span><span class="v-check">✓</span>';
       oBtn.onclick=function(){
         st.nc.oracleCheck=i;sfx('select');
         var r2=ri(p.role);
-        showToast('🔮 '+p.name+' (hồn ma): '+r2.emoji+' '+r2.name,3500);sfx('reveal');
-        logNReplace('🌙 Bói Toán','🌙 Bói Toán: '+p.name+' → '+r2.name);
+        showToast('🔮 '+esc(p.name)+' (hồn ma): '+r2.emoji+' '+r2.name,3500);sfx('reveal');
+        logNReplace('🌙 Bói Toán','🌙 Bói Toán: '+esc(p.name)+' → '+r2.name);
         oWrap.querySelectorAll('.victim-btn').forEach(function(b){b.className='victim-btn';});
         oBtn.classList.add('sel-acc');
       };

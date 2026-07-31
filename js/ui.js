@@ -15,10 +15,21 @@ export function goScreen(id) {
   if(id !== 's-home') sfx('whoosh');
 }
 
+export function setPlayerButton(button, player, role, suffix) {
+  var emoji = document.createElement('span');
+  emoji.className = 'v-emoji';
+  emoji.textContent = role.emoji;
+  var name = document.createElement('span');
+  name.className = 'v-name';
+  name.textContent = player.name + (suffix || '');
+  button.appendChild(emoji);
+  button.appendChild(name);
+}
+
 export function showToast(msg, dur) {
   dur = dur || 2600;
   var t = document.getElementById('toast');
-  t.innerHTML = msg; t.style.display = 'block';
+  t.textContent = msg; t.style.display = 'block';
   clearTimeout(t._t);
   t._t = setTimeout(function(){t.style.display='none';}, dur);
 }

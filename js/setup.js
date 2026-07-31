@@ -170,10 +170,15 @@ export function renderSavedChips() {
   var cont = document.getElementById('saved-chips'); cont.innerHTML='';
   saved.forEach(function(name){
     var chip = document.createElement('span'); chip.className='saved-player-chip';
-    chip.innerHTML = name+' <span onclick="event.stopPropagation();removePlayer(\''+name+'\')" style="color:var(--rose);font-size:.8rem;margin-left:3px">×</span>';
+    chip.textContent = name;
+    var del = document.createElement('span');
+    del.textContent = '×';
+    del.style.cssText = 'color:var(--rose);font-size:.8rem;margin-left:3px';
+    del.onclick = function(e){ e.stopPropagation(); removePlayer(name); };
+    chip.appendChild(del);
     chip.onclick = function(){
       sfx('click'); chip.classList.toggle('sel');
-      if(chip.classList.contains('sel'))selectedSaved.push(name);
+      if(chip.classList.contains('selected'))selectedSaved.push(name);
       else selectedSaved=selectedSaved.filter(function(n){return n!==name;});
     };
     cont.appendChild(chip);

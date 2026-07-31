@@ -3,6 +3,12 @@ import { sfx, stopBgm } from './audio.js?v=6';
 import { st } from './state.js?v=6';
 import { goScreen, showToast, ri } from './ui.js?v=6';
 
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, function(c) {
+    return {'&':'&','<':'<','>':'>','"':'"',"'":'''}[c];
+  });
+}
+
 function processDeath() {
   if(st.hunterQueue.length) { processHunterQueue(); return; }
   if(st.sheriffPassQueue.length) { processSheriffPassQueue(); return; }
@@ -126,9 +132,9 @@ export function startDay() {
   cont.innerHTML=events.map(function(e){
     if(e.type==='quiet')return '<div class="result-row quiet-row"><span>✨</span><span>Đêm bình yên — không ai chết!</span></div>';
     var p=st.players[e.idx], r=ri(p.role);
-    if(e.type==='dead')return '<div class="result-row dead-row"><span style="font-size:1rem">'+r.emoji+'</span><div><strong>'+p.name+'</strong><br><span style="font-size:.74rem;color:var(--muted)">'+e.reason+'</span><br><span style="font-size:.72rem;color:var(--rose)">Vai: '+r.name+'</span></div></div>';
-    if(e.type==='revive'){var rIcon=e.reason&&e.reason.startsWith('😈')?'😈':'🌟';return '<div class="result-row safe-row"><span style="font-size:1rem">'+rIcon+'</span><div><strong>'+p.name+'</strong><br><span style="font-size:.74rem;color:var(--teal)">'+(e.reason||'✨ Được hồi sinh!')+'</span></div></div>';}
-    return '<div class="result-row safe-row"><span style="font-size:1rem">'+r.emoji+'</span><div><strong>'+p.name+'</strong><br><span style="font-size:.74rem;color:var(--teal)">'+e.reason+'</span></div></div>';
+    if(e.type==='dead')return '<div class="result-row dead-row"><span style="font-size:1rem">'+r.emoji+'</span><div><strong>'+esc(p.name)+'</strong><br><span style="font-size:.74rem;color:var(--muted)">'+e.reason+'</span><br><span style="font-size:.72rem;color:var(--rose)">Vai: '+r.name+'</span></div></div>';
+    if(e.type==='revive'){var rIcon=e.reason&&e.reason.startsWith('😈')?'😈':'🌟';return '<div class="result-row safe-row"><span style="font-size:1rem">'+rIcon+'</span><div><strong>'+esc(p.name)+'</strong><br><span style="font-size:.74rem;color:var(--teal)">'+(e.reason||'✨ Được hồi sinh!')+'</span></div></div>';}
+    return '<div class="result-row safe-row"><span style="font-size:1rem">'+r.emoji+'</span><div><strong>'+esc(p.name)+'</strong><br><span style="font-size:.74rem;color:var(--teal)">'+e.reason+'</span></div></div>';
   }).join('');
 
   events.some(function(e){return e.type==='dead';})?sfx('dead'):sfx('confirm');
@@ -184,15 +190,26 @@ export function processHunterQueue() {
   var p=st.players[item.idx];
   var isAlpha=item.type==='alphawolf';
   document.getElementById('hunter-icon').textContent=isAlpha?'👑':'🏹';
-  document.getElementById('hunter-title').textContent=isAlpha?'👑 '+p.name+' — Sói Đầu Đàn kéo theo!':'🏹 '+p.name+' — Thợ Săn kích hoạt!';
-  document.getElementById('hunter-sub').textContent=isAlpha?p.name+' bị loại. Họ có thể kéo thêm 1 người chết theo!':p.name+' đã chết. Họ có thể bắn 1 người trước khi ra đi.';
+  document.getElementById('hunter-title').textContent=isAlpha?'👑 '+esc(p.name)+' — Sói Đầu Đàn kéo theo!':'🏹 '+esc(p.name)+' — Thợ Săn kích hoạt!';
+  document.getElementById('hunter-sub').textContent=isAlpha?esc(p.name)+' bị loại. Họ có thể kéo thêm 1 người chết theo!':esc(p.name)+' đã chết. Họ có thể bắn 1 người trước khi ra đi.';
   document.getElementById('hunter-pick-label').textContent=isAlpha?'Chọn người bị kéo theo:':'Chọn người muốn bắn:';
   var list=document.getElementById('hunter-list'); list.innerHTML='';
   st.players.forEach(function(pl,i){
     if(!pl.alive||i===item.idx)return;
     var r=ri(pl.role);
     var btn=document.createElement('button'); btn.className='victim-btn';
-    btn.innerHTML='<span class="v-emoji">'+r.emoji+'</span><span class="v-name">'+pl.name+'</span><span class="v-check">✓</span>';
+    var emojiSpan = document.createElement('span');
+    emojiSpan.className = 'v-emoji';
+    emojiSpan.textContent = r.emoji;
+    var nameSpan = document.createElement('span');
+    nameSpan.className = 'v-name';
+    nameSpan.textContent = esc(pl.name);
+    var checkSpan = document.createElement('span');
+    checkSpan.className = 'v-check';
+    checkSpan.textContent = '✓';
+    btn.appendChild(emojiSpan);
+    btn.appendChild(nameSpan);
+    btn.appendChild(checkSpan);
     btn.onclick=function(){hunterShoot(item,i);};
     list.appendChild(btn);
   });
@@ -229,8 +246,8 @@ export function hunterShoot(item, targetIdx) {
   var r=ri(t.role), shooter=st.players[item.idx];
   var isAlpha=item.type==='alphawolf';
   var prefix=isAlpha?'👑':'🏹';
-  var label=isAlpha?'👑 Sói Đầu Đàn '+shooter.name:'🏹 Thợ Săn '+shooter.name;
-  showToast(prefix+' '+shooter.name+' → '+t.name+' chết!<br><span style="color:var(--acc)">'+r.emoji+' '+r.name+'</span>',3500);
+  var label=isAlpha?'👑 Sói Đầu Đàn '+esc(shooter.name):'🏹 Thợ Săn '+esc(shooter.name);
+  showToast(prefix+' '+esc(shooter.name)+' → '+t.name+' chết!<br><span style="color:var(--acc)">'+r.emoji+' '+r.name+'</span>',3500);
   logDay(label+' → '+t.name+' chết');
   checkLovers(targetIdx,[]); triggerOnDeath(targetIdx);
   setTimeout(processDeath,1200);
@@ -252,7 +269,18 @@ export function processSheriffPassQueue() {
     if(!pl.alive) return;
     var r=ri(pl.role);
     var btn=document.createElement('button'); btn.className='victim-btn';
-    btn.innerHTML='<span class="v-emoji">'+r.emoji+'</span><span class="v-name">'+pl.name+'</span><span class="v-check">✓</span>';
+    var emojiSpan = document.createElement('span');
+    emojiSpan.className = 'v-emoji';
+    emojiSpan.textContent = r.emoji;
+    var nameSpan = document.createElement('span');
+    nameSpan.className = 'v-name';
+    nameSpan.textContent = esc(pl.name);
+    var checkSpan = document.createElement('span');
+    checkSpan.className = 'v-check';
+    checkSpan.textContent = '✓';
+    btn.appendChild(emojiSpan);
+    btn.appendChild(nameSpan);
+    btn.appendChild(checkSpan);
     btn.onclick=function(){sheriffPassBadge(i);};
     list.appendChild(btn);
   });
@@ -287,7 +315,18 @@ export function updatePriestCard() {
   alive.forEach(function(p){
     var r=ri(p.role);
     var btn=document.createElement('button'); btn.className='victim-btn';
-    btn.innerHTML='<span class="v-emoji">'+r.emoji+'</span><span class="v-name">'+p.name+'</span><span class="v-check">✓</span>';
+    var emojiSpan = document.createElement('span');
+    emojiSpan.className = 'v-emoji';
+    emojiSpan.textContent = r.emoji;
+    var nameSpan = document.createElement('span');
+    nameSpan.className = 'v-name';
+    nameSpan.textContent = esc(p.name);
+    var checkSpan = document.createElement('span');
+    checkSpan.className = 'v-check';
+    checkSpan.textContent = '✓';
+    btn.appendChild(emojiSpan);
+    btn.appendChild(nameSpan);
+    btn.appendChild(checkSpan);
     btn.onclick=function(){
       sfx('select');
       picker.querySelectorAll('.victim-btn').forEach(function(b){b.className='victim-btn';});
@@ -307,21 +346,21 @@ export function priestActivate(idx) {
     if(p.role==='wolfElder'&&!p.elderWolfHit){
       p.elderWolfHit=true;
       sfx('click');
-      showToast('✝️ '+p.name+' bị thánh hóa nhưng SỐNG SÓT! Là Sói Già — lần 2 mới chết.',3500);
-      logDay('✝️ Linh Mục thánh hóa '+p.name+' (Sói Già) → sống sót lần đầu');
+      showToast('✝️ '+esc(p.name)+' bị thánh hóa nhưng SỐNG SÓT! Là Sói Già — lần 2 mới chết.',3500);
+      logDay('✝️ Linh Mục thánh hóa '+esc(p.name)+' (Sói Già) → sống sót lần đầu');
       document.getElementById('priest-card').style.display='none';
       return;
     }
     p.alive=false;
     updateHUD();
-    showToast('✝️ '+p.name+' bị thánh hóa — là MA SÓI! '+r.emoji+' '+r.name+' bị loại!',4000);
-    logDay('✝️ Linh Mục thánh hóa '+p.name+' ('+r.name+') → MA SÓI, bị loại');
+    showToast('✝️ '+esc(p.name)+' bị thánh hóa — là MA SÓI! '+r.emoji+' '+r.name+' bị loại!',4000);
+    logDay('✝️ Linh Mục thánh hóa '+esc(p.name)+' ('+r.name+') → MA SÓI, bị loại');
     triggerOnDeath(idx); checkLovers(idx,[]);
     buildVoteTable();
     setTimeout(processDeath,1200);
   } else {
-    showToast('✝️ '+p.name+' bị thánh hóa — là DÂN LÀNG. Quyền năng tiêu hao.',3500);
-    logDay('✝️ Linh Mục thánh hóa '+p.name+' ('+r.name+') → Dân, không có gì xảy ra');
+    showToast('✝️ '+esc(p.name)+' bị thánh hóa — là DÂN LÀNG. Quyền năng tiêu hao.',3500);
+    logDay('✝️ Linh Mục thánh hóa '+esc(p.name)+' ('+r.name+') → Dân, không có gì xảy ra');
   }
   document.getElementById('priest-card').style.display='none';
 }
@@ -341,9 +380,18 @@ export function buildVoteTable() {
     st.voteMap[i]=0;
     var r=ri(p.role);
     var isSheriff = (i===st.sheriffIdx);
-    var nameTd = p.name + (isSheriff ? ' <span style="color:var(--gold);font-size:.75rem" title="Phiếu đôi">⭐×2</span>' : '');
+    var nameTd = esc(p.name) + (isSheriff ? ' <span style="color:var(--gold);font-size:.75rem" title="Phiếu đôi">⭐×2</span>' : '');
     var tr=document.createElement('tr');
-    tr.innerHTML='<td>'+r.emoji+'</td><td style="font-weight:500">'+nameTd+'</td><td><div class="vote-input-wrap"><button onclick="chVote('+i+',-1)">−</button><span id="vi-'+i+'">0</span><button onclick="chVote('+i+',1)">+</button></div></td>';
+    var voteTd = document.createElement('td');
+    voteTd.textContent = r.emoji;
+    tr.appendChild(voteTd);
+    var nameTdEl = document.createElement('td');
+    nameTdEl.style.cssText = 'font-weight:500';
+    nameTdEl.textContent = esc(p.name);
+    tr.appendChild(nameTdEl);
+    var voteControlsTd = document.createElement('td');
+    voteControlsTd.innerHTML = '<div class="vote-input-wrap"><button onclick="chVote('+i+',-1)">−</button><span id="vi-'+i+'">0</span><button onclick="chVote('+i+',1)">+</button></div>';
+    tr.appendChild(voteControlsTd);
     tbl.appendChild(tr);
   });
   var note = document.getElementById('sheriff-vote-note');
@@ -367,7 +415,7 @@ export function showVoteResult() {
     var v=st.voteMap[p.i]||0, isTop=v===maxV&&maxV>0, r=ri(p.role);
     var pct=maxV>0?Math.round(v/maxV*100):0;
     var div=document.createElement('div'); div.className='vote-result-row '+(isTop?'top':'normal');
-    div.innerHTML='<span>'+r.emoji+'</span><span style="font-weight:600;flex:1">'+p.name+'</span><span style="font-size:.83rem;font-weight:700;color:'+(isTop?'var(--rose)':'var(--muted)')+'">'+v+'p</span><div class="vote-bar-wrap"><div class="vote-bar" style="width:'+pct+'%;background:'+(isTop?'var(--rose)':'var(--acc2)')+'"></div></div>';
+    div.innerHTML='<span>'+r.emoji+'</span><span style="font-weight:600;flex:1">'+esc(p.name)+'</span><span style="font-size:.83rem;font-weight:700;color:'+(isTop?'var(--rose)':'var(--muted)')+'">'+v+'p</span><div class="vote-bar-wrap"><div class="vote-bar" style="width:'+pct+'%;background:'+(isTop?'var(--rose)':'var(--acc2)')+'"></div></div>';
     rl.appendChild(div);
   });
   var exSec=document.getElementById('vote-execute-section');
@@ -378,12 +426,12 @@ export function showVoteResult() {
     if(sgAlive.length){
       st.voteTopIdx=sgAlive[0].i;
       exSec.style.display='block';
-      exLbl.innerHTML='⚖️ Hoà phiếu! → 🐑 <strong>'+sgAlive[0].name+'</strong> (Vật Tế Thần) tự động bị hành quyết!';
+      exLbl.innerHTML='⚖️ Hoà phiếu! → 🐑 <strong>'+esc(sgAlive[0].name)+'</strong> (Vật Tế Thần) tự động bị hành quyết!';
     } else {
       exSec.style.display='block';exLbl.textContent='Hoà '+tops.length+' người! Không treo cổ ai.';st.voteTopIdx=-1;
     }
   }
-  else{st.voteTopIdx=tops[0].i;exSec.style.display='block';exLbl.innerHTML='⚡ <strong>'+tops[0].name+'</strong> nhiều phiếu nhất ('+maxV+' phiếu)';}
+  else{st.voteTopIdx=tops[0].i;exSec.style.display='block';exLbl.innerHTML='⚡ <strong>'+esc(tops[0].name)+'</strong> nhiều phiếu nhất ('+maxV+' phiếu)';}
   document.getElementById('vote-result-card').style.display='block';
   document.getElementById('vote-result-card').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
@@ -393,10 +441,10 @@ export function executeVote() {
   sfx('hang');
   var p=st.players[st.voteTopIdx]; p.alive=false;
   var r=ri(p.role);
-  if(st.currentLogRound)st.currentLogRound.day={voted:st.voteTopIdx,executed:true,name:p.name,role:r.name,roleEmoji:r.emoji,isWolf:WOLF_ROLES.includes(p.role)};
-  showToast('🪢 '+p.name+' bị treo cổ!<br><span style="color:var(--acc)">'+r.emoji+' '+r.name+'</span>',3500);
+  if(st.currentLogRound)st.currentLogRound.day={voted:st.voteTopIdx,executed:true,name:esc(p.name),role:r.name,roleEmoji:r.emoji,isWolf:WOLF_ROLES.includes(p.role)};
+  showToast('🪢 '+esc(p.name)+' bị treo cổ!<br><span style="color:var(--acc)">'+r.emoji+' '+r.name+'</span>',3500);
   if(p.role==='fool'){
-    setTimeout(function(){sfx('win');setWin('🃏','KẺ NGỐC THẮNG!',p.name+' bị treo cổ đúng kế hoạch! Vòng '+st.round+'.');},1200);
+    setTimeout(function(){sfx('win');setWin('🃏','KẺ NGỐC THẮNG!',esc(p.name)+' bị treo cổ đúng kế hoạch! Vòng '+st.round+'.');},1200);
     return;
   }
   triggerOnDeath(st.voteTopIdx); checkLovers(st.voteTopIdx,[]);
@@ -454,7 +502,7 @@ export function showStatus() {
     var action=p.alive
       ?'<button class="p-kill" onclick="killPlayer('+i+')" title="Đánh dấu chết">💀</button>'
       :'<span style="color:var(--rose);font-size:.72rem">Chết</span><button class="p-kill" onclick="revivePlayer('+i+')" title="Hồi sinh (GM override)" style="margin-left:.4rem;font-size:.8rem;background:rgba(20,184,166,.15);border-color:rgba(20,184,166,.4);color:var(--teal)">↩</button>';
-    d.innerHTML='<div class="p-avatar">'+r.emoji+'</div><div class="p-name">'+p.name+'</div><div class="p-role">'+r.name+'</div>'+action;
+    d.innerHTML='<div class="p-avatar">'+r.emoji+'</div><div class="p-name">'+esc(p.name)+'</div><div class="p-role">'+r.name+'</div>'+action;
     l.appendChild(d);
   });
   goScreen('s-status');document.getElementById('fnav').style.display='none';
@@ -506,7 +554,7 @@ export function showHistory() {
       var dayHd=document.createElement('div');dayHd.style.cssText='background:rgba(251,191,36,.06);border-top:1px solid rgba(251,191,36,.15);padding:.35rem .8rem;font-size:.72rem;font-weight:600;color:var(--gold);letter-spacing:1px;';dayHd.textContent='☀️ BAN NGÀY';div.appendChild(dayHd);
       if(log.day){
         var e=document.createElement('div');e.className='hist-entry';
-        e.innerHTML=log.day.executed?'<span class="hist-dead">🪢 '+log.day.name+' bị treo cổ</span> <span style="font-size:.72rem;color:var(--muted)">('+log.day.role+')</span>':'<span class="hist-action">🕊️ Không treo cổ ai</span>';
+        e.innerHTML=esc(log.day.executed)?'<span class="hist-dead">🪢 '+esc(log.day.name)+' bị treo cổ</span> <span style="font-size:.72rem;color:var(--muted)">('+log.day.role+')</span>':'<span class="hist-action">🕊️ Không treo cổ ai</span>';
         div.appendChild(e);
       } else {
         var e=document.createElement('div');e.className='hist-entry hist-action';e.textContent='(Chưa có kết quả)';div.appendChild(e);
@@ -518,7 +566,7 @@ export function showHistory() {
     st.players.forEach(function(p){
       var r=ri(p.role);
       var e=document.createElement('div');e.className='hist-entry';
-      e.innerHTML=(p.alive?'<span style="color:var(--teal)">✓</span>':'<span class="hist-dead">✝</span>')+' '+r.emoji+' '+p.name+' <span style="font-size:.72rem;color:var(--muted)">('+r.name+')</span>';
+      e.innerHTML=(p.alive?'<span style="color:var(--teal)">✓</span>':'<span class="hist-dead">✝</span>')+' '+r.emoji+' '+esc(p.name)+' <span style="font-size:.72rem;color:var(--muted)">('+r.name+')</span>';
       fd.appendChild(e);
     });
     cont.appendChild(fd);
@@ -602,13 +650,13 @@ export function showRecap() {
       var e=document.createElement('div'); e.className='recap-event recap-quiet'; e.innerHTML='<span class="recap-bullet">▸</span> ✨ Đêm bình yên'; rd.appendChild(e);
     }
     var dhd=document.createElement('div'); dhd.className='recap-day-hd'; dhd.textContent='☀️ Ngày '+log.round; rd.appendChild(dhd);
-    if(log.day&&log.day.executed){
+    if(log.day&&esc(log.day.executed)){
       var iw=log.day.isWolf;
       var de=document.createElement('div'); de.className='recap-event '+(iw?'recap-dead':'recap-miss');
-      de.innerHTML='<span class="recap-bullet">▸</span> 🪢 Treo cổ <strong>'+log.day.name+'</strong> '+(log.day.roleEmoji||'')+' <span style="font-size:.76rem;color:var(--muted)">'+log.day.role+'</span> '+
+      de.innerHTML='<span class="recap-bullet">▸</span> 🪢 Treo cổ <strong>'+esc(log.day.name)+'</strong> '+(log.day.roleEmoji||'')+' <span style="font-size:.76rem;color:var(--muted)">'+log.day.role+'</span> '+
         (iw?'<span class="recap-tag recap-tag-wolf">Sói 🐺</span>':'<span class="recap-tag recap-tag-vil">Dân ✓</span>');
       rd.appendChild(de);
-    } else if(log.day&&!log.day.executed){
+    } else if(log.day&&!esc(log.day.executed)){
       var de=document.createElement('div'); de.className='recap-event recap-quiet';
       de.innerHTML='<span class="recap-bullet">▸</span> 🕊️ Không ai bị treo cổ'; rd.appendChild(de);
     } else {
@@ -623,7 +671,7 @@ export function showRecap() {
     var r=ri(p.role), iw=WOLF_ROLES.includes(p.role);
     var e=document.createElement('div'); e.className='recap-event';
     e.innerHTML=(p.alive?'<span style="color:var(--teal)">✓</span>':'<span style="color:var(--rose)">✝</span>')+
-      ' '+r.emoji+' <strong>'+p.name+'</strong> <span style="font-size:.74rem;color:'+(iw?'var(--rose)':'var(--muted)')+'">'+r.name+'</span>'+
+      ' '+r.emoji+' <strong>'+esc(p.name)+'</strong> <span style="font-size:.74rem;color:'+(iw?'var(--rose)':'var(--muted)')+'">'+r.name+'</span>'+
       (iw?' <span class="recap-tag recap-tag-wolf">Sói</span>':'');
     revd.appendChild(e);
   });
